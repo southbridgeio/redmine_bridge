@@ -5,4 +5,6 @@ Redmine::Plugin.register :redmine_bridge do
   version '0.0.1'
   url 'https://github.com/southbridgeio/redmine_bridge'
   author_url 'https://slurm.io'
+
+  settings default: { 'empty' => true }, partial: 'bridge_integrations/index'
 end
