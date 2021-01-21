@@ -7,7 +7,7 @@ class RedmineBridge::WebhookController < ActionController::API
 
     result = connector.on_webhook_event(
       request: request,
-      project: project,
+      integration: integration,
       create_issue: ->(params) { Issue.create!(params) },
       update_issue: ->(issue, params) { issue.update(params) }
     )
@@ -16,15 +16,6 @@ class RedmineBridge::WebhookController < ActionController::API
   end
 
   private
-
-  def project
-    @project ||= Project.find(integration.project_id)
-  end
-
-  # TODO how to get issue id?
-  def issue
-    project.issues.find(params)
-  end
 
   def integration
     @integration ||= BridgeIntegration.find_by(key: params[:key])
