@@ -12,17 +12,43 @@
   <p><%= form.text_field 'key' %></p>
 
   <p><%= form.label 'Тип интеграции' %></p>
-  <p><%= form.select 'connector_id', RedmineBridge::Registry.keys %></p>
+  <p><%= form.select 'connector_id', RedmineBridge::Registry.keys, {}, id: "connector_id", 'data-initial-value': @bridge_integration.connector_id || RedmineBridge::Registry.keys.first %></p>
 
-  <p><%= form.label 'Redmine Project' %></p>
-  <p><%= form.text_field 'project_id' %></p>
+  <p><%= form.label 'Redmine проект' %></p>
+  <p><%= form.select 'project_id', Project.pluck(:name, :id) %></p>
 
-  <p><%= form.label 'Настройки' %></p>
-  <p><%= form.text_field 'settings[redmine_status_id]', value: @bridge_integration.settings['redmine_status_id'] %></p>
-  <p><%= form.text_field 'settings[connector_status_id]', value: @bridge_integration.settings['connector_status_id'] %></p>
+  <p><%= form.label 'ID проекта интеграции' %></p>
+  <p><%= form.text_field 'settings[connector_project_id]', value: @bridge_integration.settings['connector_project_id'] %></p>
 
-  <p><%= form.text_field 'settings[redmine_priority_id]', value: @bridge_integration.settings['redmine_priority_id'] %></p>
-  <p><%= form.text_field 'settings[connector_priority_id]', value: @bridge_integration.settings['connector_priority_id'] %></p>
+  <p><%= form.label 'Настройка статусов:' %></p>
+
+  <% IssueStatus.all.each do |status| %>
+    <p><%= form.label status.name %></p>
+    <p><%= form.text_field "settings[statuses][#{status.id}]", value: @bridge_integration.settings.dig('statuses', status.id.to_s) %></p>
+  <% end %>
+
+  <p><%= form.label 'Настройка приоритетов:' %></p>
+
+  <% Enumeration.where(type: 'IssuePriority').each do |enum| %>
+    <p><%= form.label enum.name %></p>
+    <p><%= form.text_field "settings[priorities][#{enum.id}]", value: @bridge_integration.settings.dig('priorities', enum.id.to_s) %></p>
+  <% end %>
+
+  <% RedmineBridge::Registry.keys.each do |key| %>
+    <div id="<%= key %>_form" class="<%= key.to_s == @bridge_integration.connector_id ? nil : 'hidden' %>">
+      <%= render "redmine_bridge/#{key}", form: form rescue nil %>
+    </div>
+  <% end %>
 
   <p><%= form.submit %></p>
 <% end %>
+
+<script>
+  let connector = document.getElementById('connector_id');
+
+  connector.addEventListener('change', (event) => {
+    $(`#${connector.dataset.initialValue}_form`).addClass('hidden');
+    $(`#${connector.value}_form`).removeClass('hidden');
+    connector.dataset.initialValue = connector.value
+  })
+</script>

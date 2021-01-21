@@ -50,7 +50,7 @@ class BridgeIntegrationsController < ApplicationController
       :key,
       :connector_id,
       :project_id,
-      settings: %i[redmine_status_id connector_status_id redmine_priority_id connector_priority_id]
+      settings: {}
     )
   end
 end
