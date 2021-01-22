@@ -21,12 +21,12 @@ class RedmineBridge::JiraConnector
                               "http://localhost:8080/browse/#{params.dig('issue', 'key')}",
                               project_id: project.id,
                               subject: params.dig('issue', 'fields', 'summary'),
-                              description: params.dig('issue', 'fields', 'description'),
+                              description: "<pre>#{params.dig('issue', 'fields', 'description')}</pre>",
                               tracker: Tracker.first,
                               author: User.anonymous)
     when 'issue_commented'
       issue_repository.add_notes(params.dig('issue', 'id'),
-                                 params.dig('issue', 'fields', 'comment', 'comments').last['body'])
+                                 "Автор: #{params.dig('user', 'displayName')}\n<pre>#{params.dig('issue', 'fields', 'comment', 'comments').last['body']}</pre>")
     else
       # skip
     end
