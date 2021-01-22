@@ -3,6 +3,5 @@
 module RedmineBridge::Registry
   extend Dry::Container::Mixin
 
-  register(:jira) { Jira.new }
-  register(:trello) { Jira.new }
+  register(:jira) { RedmineBridge::JiraConnector.new }
 end

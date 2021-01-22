@@ -1,0 +1,3 @@
+<% if external_issue = ExternalIssue.find_by(redmine_id: @issue.id) %>
+  <%= link_to "Задача в #{external_issue.connector_id}", external_issue.external_url, target: '_blank' %>
+<% end %>

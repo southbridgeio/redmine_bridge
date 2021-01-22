@@ -1,0 +1,3 @@
+class RedmineBridge::Connector
+
+end

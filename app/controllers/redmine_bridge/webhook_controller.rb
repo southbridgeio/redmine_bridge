@@ -8,8 +8,7 @@ class RedmineBridge::WebhookController < ActionController::API
     result = connector.on_webhook_event(
       request: request,
       integration: integration,
-      create_issue: ->(params) { Issue.create!(params) },
-      update_issue: ->(issue, params) { issue.update(params) }
+      issue_repository: RedmineBridge::IssueRepository.new(integration)
     )
 
     render json: result.to_json
@@ -22,6 +21,6 @@ class RedmineBridge::WebhookController < ActionController::API
   end
 
   def connector
-    RedmineBridge::Registry[@integration.connector_id]
+    RedmineBridge::Registry[integration.connector_id]
   end
 end
