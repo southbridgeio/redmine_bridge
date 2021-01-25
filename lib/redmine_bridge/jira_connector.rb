@@ -20,7 +20,7 @@ class RedmineBridge::JiraConnector
 
       issue_repository.update(external_attributes,
                               subject: params.dig('issue', 'fields', 'summary'),
-                              description: params.dig('issue', 'fields', 'description'))
+                              description: "<pre>#{params.dig('issue', 'fields', 'description')}</pre>")
     when 'issue_created'
       uri = URI(params.dig('issue', 'self'))
 
