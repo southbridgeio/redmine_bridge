@@ -5,7 +5,7 @@ class CreateBridgeIntegrations < ActiveRecord::Migration[5.2]
       t.string :key, null: false
       t.string :connector_id, null: false
       t.references :project, foreign_key: true, index: true
-      t.jsonb :settings, default: {}
+      t.json :settings, default: {}
 
       t.timestamps
     end
