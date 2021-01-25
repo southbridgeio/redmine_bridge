@@ -11,7 +11,7 @@ class RedmineBridge::JiraConnector
     project = integration.project
 
     case params['issue_event_type_name']
-    when 'issue_updated'
+    when 'issue_updated', 'issue_generic'
       external_attributes = RedmineBridge::ExternalAttributes.new(
         id: params.dig('issue', 'id'),
         status_id: params.dig('issue', 'fields', 'status', 'id'),
@@ -42,7 +42,7 @@ class RedmineBridge::JiraConnector
       issue_repository.add_notes(params.dig('issue', 'id'),
                                  "Автор: #{params.dig('user', 'displayName')}\n<pre>#{params.dig('issue', 'fields', 'comment', 'comments').last['body']}</pre>")
     else
-      # skip
+      raise "Unknown event (#{params['issue_event_type_name']})"
     end
   end
 end
