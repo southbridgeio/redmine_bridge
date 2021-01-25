@@ -2,6 +2,8 @@
 
 # Integration model
 class BridgeIntegration < ActiveRecord::Base
+  belongs_to :project
+
   store :settings, accessors: %i[statuses priorities]
 
   validates :name,
