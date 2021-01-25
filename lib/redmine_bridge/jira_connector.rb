@@ -7,18 +7,32 @@ class RedmineBridge::JiraConnector
     # TODO
   end
 
-  def on_webhook_event(integration:, request:, issue_repository:)
+  def on_webhook_event(integration:, params:, issue_repository:)
     project = integration.project
-    params = request.params
 
     case params['issue_event_type_name']
     when 'issue_updated'
-      issue_repository.update(params.dig('issue', 'id'),
+      external_attributes = RedmineBridge::ExternalAttributes.new(
+        id: params.dig('issue', 'id'),
+        status_id: params.dig('issue', 'fields', 'status', 'id'),
+        priority_id: params.dig('issue', 'fields', 'priority', 'id'),
+      )
+
+      issue_repository.update(external_attributes,
                               subject: params.dig('issue', 'fields', 'summary'),
                               description: params.dig('issue', 'fields', 'description'))
     when 'issue_created'
-      issue_repository.create(params.dig('issue', 'id'),
-                              "http://localhost:8080/browse/#{params.dig('issue', 'key')}",
+      uri = URI(params.dig('issue', 'self'))
+
+      base_url = "#{uri.scheme}://#{uri.host}#{uri.port == 80 ? '' : ":#{uri.port}"}"
+
+      external_attributes = RedmineBridge::ExternalAttributes.new(
+        id: params.dig('issue', 'id'),
+        status_id: params.dig('issue', 'fields', 'status', 'id'),
+        priority_id: params.dig('issue', 'fields', 'priority', 'id'),
+        url: File.join(base_url, "browse/#{params.dig('issue', 'key')}")
+      )
+      issue_repository.create(external_attributes,
                               project_id: project.id,
                               subject: params.dig('issue', 'fields', 'summary'),
                               description: "<pre>#{params.dig('issue', 'fields', 'description')}</pre>",

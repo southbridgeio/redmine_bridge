@@ -3,22 +3,29 @@ class RedmineBridge::IssueRepository
     @integration = integration
   end
 
-  def create(external_id, external_url, **params)
+  def create(external_attributes, **params)
+    status_id = integration.statuses.invert[external_attributes.status_id.to_s]
+    priority_id = integration.priorities.invert[external_attributes.priority_id.to_s]
+
+
     ActiveRecord::Base.transaction do
-      issue = Issue.create!(params)
+      issue = Issue.create!(params.merge(status_id: status_id, priority_id: priority_id).compact)
       ExternalIssue.create!(redmine_id: issue.id,
                             connector_id: connector_id,
-                            external_id: external_id,
-                            external_url: external_url)
+                            external_id: external_attributes.id,
+                            external_url: external_attributes.url)
     end
   end
 
-  def update(external_id, **params)
-    issue = ExternalIssue.find_by(external_id: external_id, connector_id: connector_id)&.redmine_issue
+  def update(external_attributes, **params)
+    issue = ExternalIssue.find_by(external_id: external_attributes.id, connector_id: connector_id)&.redmine_issue
     return unless issue
 
+    status_id = integration.statuses.invert[external_attributes.status_id.to_s]
+    priority_id = integration.priorities.invert[external_attributes.priority_id.to_s]
+
     issue.init_journal(User.anonymous)
-    issue.assign_attributes(params)
+    issue.assign_attributes(params.merge(status_id: status_id, priority_id: priority_id).compact)
     issue.save!
   end
 
