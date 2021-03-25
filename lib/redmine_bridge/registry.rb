@@ -3,5 +3,6 @@
 module RedmineBridge::Registry
   extend Dry::Container::Mixin
 
-  register(:jira) { RedmineBridge::JiraConnector.new }
+  register :jira, RedmineBridge::JiraConnector.new
+  register :prometheus, RedmineBridge::PrometheusConnector.new
 end
