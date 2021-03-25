@@ -12,13 +12,14 @@ class RedmineBridge::PrometheusConnector
 
     if external_issue = ExternalIssue.find_by(external_id: params['groupKey'])
       case params['status']
-      when 'resolved'
+      when 'resolved', 'Resolve'
         issue_repository.add_notes(params['groupKey'], "Инцидент завершён:\n#{format_payload(params)}")
-      when 'firing'
+      when 'firing', 'Problem'
         ActiveRecord::Base.transaction do
           external_attributes = RedmineBridge::ExternalAttributes.new(
             id: params['groupKey'],
-            url: params['externalURL']
+            url: params['externalURL'],
+            priority_id: params['severity']
           )
           issue_repository.update(external_attributes, status: IssueStatus.sorted.first) if external_issue.redmine_issue&.closed?
           issue_repository.add_notes(params['groupKey'], "Новое состояние:\n#{format_payload(params)}")
@@ -27,7 +28,8 @@ class RedmineBridge::PrometheusConnector
     elsif params['status'] != 'resolved'
       external_attributes = RedmineBridge::ExternalAttributes.new(
         id: params['groupKey'],
-        url: params['externalURL']
+        url: params['externalURL'],
+        priority_id: params['severity']
       )
       issue_repository.create(external_attributes,
                               project_id: project.id,
