@@ -18,20 +18,13 @@ class RedmineBridge::PrometheusConnector
       when 'resolved', 'Resolve'
         issue_repository.add_notes(params['groupKey'], "Инцидент завершён:\n#{format_payload(params)}")
       when 'firing', 'Problem'
-        ActiveRecord::Base.transaction do
-          external_attributes = RedmineBridge::ExternalAttributes.new(
-            id: params['groupKey'],
-            url: params['externalURL'],
-            priority_id: params['alerts'].first.dig('labels', 'severity')
-          )
-          issue_repository.add_notes(params['groupKey'], "Новое состояние:\n#{format_payload(params)}")
-        end
+        issue_repository.add_notes(params['groupKey'], "Новое состояние:\n#{format_payload(params)}")
       end
     elsif params['status'] != 'resolved'
       external_attributes = RedmineBridge::ExternalAttributes.new(
         id: params['groupKey'],
         url: params['externalURL'],
-        priority_id: params['severity']
+        priority_id: params['alerts'].first.dig('labels', 'severity')
       )
       issue_repository.create(external_attributes,
                               project_id: project.id,
