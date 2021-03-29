@@ -19,7 +19,7 @@ class RedmineBridge::PrometheusConnector
           external_attributes = RedmineBridge::ExternalAttributes.new(
             id: params['groupKey'],
             url: params['externalURL'],
-            priority_id: params['severity']
+            priority_id: params.dig('alerts', 'labels', 'severity')
           )
           issue_repository.update(external_attributes, status: IssueStatus.sorted.first) if external_issue.redmine_issue&.closed?
           issue_repository.add_notes(params['groupKey'], "Новое состояние:\n#{format_payload(params)}")
@@ -33,7 +33,7 @@ class RedmineBridge::PrometheusConnector
       )
       issue_repository.create(external_attributes,
                               project_id: project.id,
-                              subject: "Alert Manager: #{params['groupKey']}",
+                              subject: params['alerts'].first.dig('labels', 'alertname'),
                               description: format_payload(params),
                               tracker: Tracker.first,
                               author: User.anonymous)
@@ -43,6 +43,10 @@ class RedmineBridge::PrometheusConnector
   private
 
   def format_payload(payload)
-    "<pre>#{JSON.pretty_generate(payload)}</pre>"
+    [
+      "#{payload.dig('commonAnnotations', 'summary')}\nВремя начала: #{payload['alerts'].first['startsAt']}",
+      payload.dig('commonAnnotations', 'dashboard', 'value'),
+      payload.dig('commonAnnotations', 'kb')
+    ].reject(&:blank?).join("\n")
   end
 end
