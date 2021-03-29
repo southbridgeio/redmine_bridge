@@ -11,7 +11,7 @@ class RedmineBridge::PrometheusConnector
     project = integration.project
 
     external_issue = ExternalIssue.find_by(external_id: params['groupKey'])
-    external_issue.destroy! if external_issue.redmine_issue&.closed?
+    external_issue.destroy! if external_issue&.redmine_issue&.closed?
 
     if ExternalIssue.exists?(external_id: params['groupKey'], connector_id: 'gitlab')
       case params['status']
