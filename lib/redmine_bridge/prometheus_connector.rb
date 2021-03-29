@@ -10,7 +10,10 @@ class RedmineBridge::PrometheusConnector
   def on_webhook_event(integration:, params:, issue_repository:)
     project = integration.project
 
-    if external_issue = ExternalIssue.find_by(external_id: params['groupKey'])
+    external_issue = ExternalIssue.find_by(external_id: params['groupKey'])
+    external_issue.destroy! if external_issue.redmine_issue&.closed?
+
+    if ExternalIssue.exists?(external_id: params['groupKey'], connector_id: 'gitlab')
       case params['status']
       when 'resolved', 'Resolve'
         issue_repository.add_notes(params['groupKey'], "Инцидент завершён:\n#{format_payload(params)}")
@@ -21,7 +24,6 @@ class RedmineBridge::PrometheusConnector
             url: params['externalURL'],
             priority_id: params['alerts'].first.dig('labels', 'severity')
           )
-          issue_repository.update(external_attributes, status: IssueStatus.sorted.first) if external_issue.redmine_issue&.closed?
           issue_repository.add_notes(params['groupKey'], "Новое состояние:\n#{format_payload(params)}")
         end
       end
