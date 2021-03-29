@@ -19,7 +19,7 @@ class RedmineBridge::PrometheusConnector
           external_attributes = RedmineBridge::ExternalAttributes.new(
             id: params['groupKey'],
             url: params['externalURL'],
-            priority_id: params.dig('alerts', 'labels', 'severity')
+            priority_id: params['alerts'].first.dig('labels', 'severity')
           )
           issue_repository.update(external_attributes, status: IssueStatus.sorted.first) if external_issue.redmine_issue&.closed?
           issue_repository.add_notes(params['groupKey'], "Новое состояние:\n#{format_payload(params)}")
