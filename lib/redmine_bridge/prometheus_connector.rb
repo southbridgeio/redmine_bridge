@@ -13,7 +13,7 @@ class RedmineBridge::PrometheusConnector
     external_issue = ExternalIssue.find_by(external_id: params['groupKey'])
     external_issue.destroy! if external_issue&.redmine_issue&.closed?
 
-    if ExternalIssue.exists?(external_id: params['groupKey'], connector_id: 'gitlab')
+    if ExternalIssue.exists?(external_id: params['groupKey'], connector_id: 'prometheus')
       case params['status']
       when 'resolved', 'Resolve'
         issue_repository.add_notes(params['groupKey'], "Инцидент завершён:\n#{format_payload(params)}")
