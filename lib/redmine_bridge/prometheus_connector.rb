@@ -40,7 +40,7 @@ class RedmineBridge::PrometheusConnector
   def format_payload(payload)
     [
       "#{payload.dig('commonAnnotations', 'summary')}\nВремя начала: #{payload['alerts'].first['startsAt']}",
-      payload.dig('commonAnnotations', 'dashboard', 'value'),
+      payload.dig('commonAnnotations', 'dashboard'),
       payload.dig('commonAnnotations', 'kb')
     ].reject(&:blank?).join("\n")
   end
