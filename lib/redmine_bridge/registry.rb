@@ -5,4 +5,5 @@ module RedmineBridge::Registry
 
   register :jira, RedmineBridge::JiraConnector.new
   register :prometheus, RedmineBridge::PrometheusConnector.new
+  register :gitlab, RedmineBridge::GitlabConnector.new
 end

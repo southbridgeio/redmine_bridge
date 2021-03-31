@@ -4,9 +4,8 @@ class RedmineBridge::IssueRepository
   end
 
   def create(external_attributes, **params)
-    status_id = integration.statuses.invert[external_attributes.status_id.to_s]
-    priority_id = integration.priorities.invert[external_attributes.priority_id.to_s]
-
+    status_id = integration.statuses.reject { |_k, v| v.blank? }.invert[external_attributes.status_id.to_s]
+    priority_id = integration.priorities.reject { |_k, v| v.blank? }.invert[external_attributes.priority_id.to_s]
 
     ActiveRecord::Base.transaction do
       issue = Issue.create!(params.merge(status_id: status_id, priority_id: priority_id).compact)
@@ -21,8 +20,8 @@ class RedmineBridge::IssueRepository
     issue = ExternalIssue.find_by(external_id: external_attributes.id, connector_id: connector_id)&.redmine_issue
     return unless issue
 
-    status_id = integration.statuses.invert[external_attributes.status_id.to_s]
-    priority_id = integration.priorities.invert[external_attributes.priority_id.to_s]
+    status_id = integration.statuses.reject { |_k, v| v.blank? }.invert[external_attributes.status_id.to_s]
+    priority_id = integration.priorities.reject { |_k, v| v.blank? }.invert[external_attributes.priority_id.to_s]
 
     issue.init_journal(User.anonymous)
     issue.assign_attributes(params.merge(status_id: status_id, priority_id: priority_id).compact)
