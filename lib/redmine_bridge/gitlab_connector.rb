@@ -12,42 +12,52 @@ class RedmineBridge::GitlabConnector
       case params.dig('object_attributes', 'action')
       when 'open'
         external_attributes = RedmineBridge::ExternalAttributes.new(
-          id: params.dig('object_attributes').values_at('id', 'project_id').join('-'),
+          id: params.dig('object_attributes').values_at('iid', 'project_id').join('-'),
           url: params.dig('object_attributes', 'url'),
           status_id: params.dig('object_attributes', 'state')
         )
         issue_repository.create(external_attributes,
                                 project_id: integration.project_id,
                                 subject: params.dig('object_attributes', 'title'),
-                                description: params.dig('object_attributes', 'description'),
+                                description: convert_to_textile(params.dig('object_attributes', 'description')),
                                 tracker: Tracker.first,
                                 author: User.anonymous)
       when 'close'
         external_attributes = RedmineBridge::ExternalAttributes.new(
-          id: params.dig('object_attributes').values_at('id', 'project_id').join('-'),
+          id: params.dig('object_attributes').values_at('iid', 'project_id').join('-'),
           status_id: params.dig('object_attributes', 'state')
         )
         issue_repository.update(external_attributes)
       when 'reopen'
         external_attributes = RedmineBridge::ExternalAttributes.new(
-          id: params.dig('object_attributes').values_at('id', 'project_id').join('-'),
+          id: params.dig('object_attributes').values_at('iid', 'project_id').join('-'),
           status_id: params.dig('object_attributes', 'state')
         )
         issue_repository.update(external_attributes)
       when 'update'
         external_attributes = RedmineBridge::ExternalAttributes.new(
-          id: params.dig('object_attributes').values_at('id', 'project_id').join('-'),
+          id: params.dig('object_attributes').values_at('iid', 'project_id').join('-'),
           status_id: params.dig('object_attributes', 'state')
         )
         issue_repository.update(external_attributes,
                                 subject: params.dig('object_attributes', 'title'),
-                                description: params.dig('object_attributes', 'description'))
+                                description: convert_to_textile(params.dig('object_attributes', 'description')))
       else
         raise 'Unknown action'
       end
     elsif params['event_type'] == 'note' && params['issue']
-      issue_repository.add_notes(params.dig('issue').values_at('id', 'project_id').join('-'),
-                                 "Автор: #{params.dig('user', 'name')}\n#{params.dig('object_attributes', 'note')}")
+      issue_repository.add_notes(params.dig('issue').values_at('iid', 'project_id').join('-'),
+                                 "Автор: #{params.dig('user', 'name')}\n#{convert_to_textile(params.dig('object_attributes', 'note'))}")
     end
+  end
+
+  private
+
+  def convert_to_textile(text)
+    Mcbean.markdown(text).to_redmine_textile
+  end
+
+  def convert_to_markdown(text)
+    Mcbean.redmine_textile(text).to_markdown
   end
 end
