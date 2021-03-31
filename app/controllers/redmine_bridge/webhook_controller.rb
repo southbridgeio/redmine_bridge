@@ -3,9 +3,10 @@
 # Find integration and move to connector
 class RedmineBridge::WebhookController < ActionController::API
   def create
-    request.params[:key] = request.headers['Authorization']&.gsub(/^Bearer /, '') unless params[:key]
+    key = params[:key].presence || request.headers['Authorization']&.gsub(/^Bearer /, '')
+    integration = BridgeIntegration.find_by!(key: key)
 
-    RedmineBridge::WebhookJob.perform_later(request.params)
+    RedmineBridge::WebhookJob.perform_later(integration, request.request_parameters)
 
     render json: {}
   end

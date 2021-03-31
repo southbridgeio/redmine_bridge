@@ -1,7 +1,5 @@
 class RedmineBridge::WebhookJob < ActiveJob::Base
-  def perform(params)
-    integration = BridgeIntegration.find_by!(key: params['key'])
-
+  def perform(integration, params)
     RedmineBridge::Registry[integration.connector_id].on_webhook_event(
       params: params,
       integration: integration,
