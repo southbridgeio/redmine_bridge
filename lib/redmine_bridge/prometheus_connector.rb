@@ -39,7 +39,7 @@ class RedmineBridge::PrometheusConnector
 
   def format_payload(payload)
     locals = {
-      description: payload.dig('commonAnnotations', 'summary'),
+      description: payload.dig('commonAnnotations', 'description'),
       start_time: payload['alerts'].first['startsAt'],
       dashboard_url: payload.dig('commonAnnotations', 'dashboard'),
       kb_url: payload.dig('commonAnnotations', 'kb')
