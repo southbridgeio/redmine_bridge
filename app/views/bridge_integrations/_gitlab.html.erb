@@ -1,0 +1,5 @@
+<p><%= form.label 'Базовый URL' %></p>
+<p><%= form.text_field "settings[base_url]", value: @bridge_integration.settings['base_url'] %></p>
+
+<p><%= form.label 'Access token' %></p>
+<p><%= form.text_field "settings[access_token]", value: @bridge_integration.settings['access_token'] %></p>

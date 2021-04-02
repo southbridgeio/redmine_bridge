@@ -36,7 +36,7 @@
 
   <% RedmineBridge::Registry.keys.each do |key| %>
     <div id="<%= key %>_form" class="<%= key.to_s == @bridge_integration.connector_id ? nil : 'hidden' %>">
-      <%= render "redmine_bridge/#{key}", form: form rescue nil %>
+      <%= render partial: "bridge_integrations/#{key}", locals: { form: form } rescue nil %>
     </div>
   <% end %>
 

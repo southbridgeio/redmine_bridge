@@ -25,6 +25,9 @@ class RedmineBridge::IssueRepository
 
     issue.init_journal(User.anonymous)
     issue.assign_attributes(params.merge(status_id: status_id, priority_id: priority_id).compact)
+
+    return unless issue.changed?
+
     issue.save!
   end
 

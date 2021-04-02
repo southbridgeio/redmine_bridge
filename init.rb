@@ -1,3 +1,7 @@
+require_relative 'lib/omni_markup'
+require_relative 'lib/omni_markup/redmine_textile'
+require_relative 'lib/omni_markup/gitlab_markdown'
+
 Redmine::Plugin.register :redmine_bridge do
   reloader = defined?(ActiveSupport::Reloader) ? ActiveSupport::Reloader : ActionDispatch::Reloader
   reloader.to_prepare do

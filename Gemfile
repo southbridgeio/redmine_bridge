@@ -1,2 +1,3 @@
 gem 'dry-container'
-gem 'mcbean', git: 'git@github.com:southbridgeio/mcbean.git'
+gem 'after_commit_everywhere'
+gem 'commonmarker'
