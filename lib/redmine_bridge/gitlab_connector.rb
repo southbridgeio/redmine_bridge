@@ -27,7 +27,7 @@ class RedmineBridge::GitlabConnector
 
     if journal.notes.present?
       integration.create_discussion(project_id, issue_iid,
-                                    body: "Автор: #{journal.user.name}\n  #{convert_to_markdown(journal.notes)}")
+                                    body: "Автор: #{journal.user.name}  \n#{convert_to_markdown(journal.notes)}")
     end
 
     gitlab_params = journal.details.reduce({}) do |result, detail|
