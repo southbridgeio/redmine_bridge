@@ -1,0 +1,28 @@
+<h2>Redmine bridge settings</h2>
+
+<table>
+  <thead>
+    <th>Name</th>
+    <th>Key</th>
+    <th>Connector type</th>
+    <th>Project</th>
+    <th>Settings</th>
+    <th>Actions</th>
+  </thead>
+  <tbody>
+    <% BridgeIntegration.all.each do |integration| %>
+      <tr>
+        <td><%= integration.name %></td>
+        <td><%= integration.key %></td>
+        <td><%= integration.connector_id %></td>
+        <td><%= integration.project_id %></td>
+        <td><%= integration.settings %></td>
+        <td><%= link_to 'edit', edit_bridge_integration_path(integration) %></td>
+        <td><%= link_to 'destroy', bridge_integration_path(integration), method: :delete %></td>
+      </tr>
+    <% end %>
+  </tbody>
+</table>
+
+<br>
+<%= link_to 'New Integration', new_bridge_integration_path %>

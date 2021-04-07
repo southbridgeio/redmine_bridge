@@ -1,0 +1,13 @@
+<% if description %>
+*Description:* <%= description %>
+<% end %>
+<% if start_time %>
+*Start time:* <%= start_time.to_time.strftime('%Y.%m.%d %H:%M:%S') %>
+<% end %>
+
+<% if dashboard_url.present? %>
+"Grafana":<%= dashboard_url %>
+<% end %>
+<% if kb_url.present? %>
+"KB":<%= kb_url %>
+<% end %>
