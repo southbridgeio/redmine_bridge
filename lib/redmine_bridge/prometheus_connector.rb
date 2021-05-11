@@ -31,7 +31,7 @@ class RedmineBridge::PrometheusConnector
           priority_id: alert.dig('labels', 'severity')
         )
 
-        title = alert.dig('labels', 'summary').presence || alert.dig('labels', 'alertname')
+        title = alert.dig('annotations', 'summary').presence || alert.dig('labels', 'alertname')
         issue_repository.create(external_attributes,
                                 project_id: project.id,
                                 subject: "Prometheus: #{title}",
