@@ -10,19 +10,21 @@ class RedmineBridge::PrometheusConnector
   def on_webhook_event(integration:, params:, issue_repository:)
     project = integration.project
 
-    external_issue = ExternalIssue.find_by(external_id: params['groupKey'])
+    external_key = "#{params['groupKey']}.#{params.dig('commonLabels', 'alertname')}"
+
+    external_issue = ExternalIssue.find_by(external_id: external_key)
     external_issue.destroy! if external_issue&.redmine_issue&.closed?
 
-    if ExternalIssue.exists?(external_id: params['groupKey'], connector_id: 'prometheus')
+    if ExternalIssue.exists?(external_id: external_key, connector_id: 'prometheus')
       case params['status']
       when 'resolved', 'Resolve'
-        issue_repository.add_notes(params['groupKey'], "Инцидент завершён:\n#{format_payload(params)}")
+        issue_repository.add_notes(external_key, "Инцидент завершён:\n#{format_payload(params)}")
       when 'firing', 'Problem'
-        issue_repository.add_notes(params['groupKey'], "Новое состояние:\n#{format_payload(params)}")
+        issue_repository.add_notes(external_key, "Новое состояние:\n#{format_payload(params)}")
       end
     elsif params['status'] != 'resolved'
       external_attributes = RedmineBridge::ExternalAttributes.new(
-        id: params['groupKey'],
+        id: external_key,
         url: '',
         priority_id: params['alerts'].first.dig('labels', 'severity')
       )
