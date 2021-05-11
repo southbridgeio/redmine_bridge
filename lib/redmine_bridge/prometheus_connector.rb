@@ -10,32 +10,35 @@ class RedmineBridge::PrometheusConnector
   def on_webhook_event(integration:, params:, issue_repository:)
     project = integration.project
 
-    external_key = "#{params['groupKey']}.#{params.dig('commonLabels', 'alertname')}"
+    params['alerts'].each do |alert|
+      alert = alert.merge(params.slice('externalURL'))
+      external_key = "#{alert['fingerprint']}.#{alert['externalURL']}"
 
-    external_issue = ExternalIssue.find_by(external_id: external_key)
-    external_issue.destroy! if external_issue&.redmine_issue&.closed?
+      external_issue = ExternalIssue.find_by(external_id: external_key)
+      external_issue.destroy! if external_issue&.redmine_issue&.closed?
 
-    if ExternalIssue.exists?(external_id: external_key, connector_id: 'prometheus')
-      case params['status']
-      when 'resolved', 'Resolve'
-        issue_repository.add_notes(external_key, "Инцидент завершён:\n#{format_payload(params)}")
-      when 'firing', 'Problem'
-        issue_repository.add_notes(external_key, "Новое состояние:\n#{format_payload(params)}")
+      if ExternalIssue.exists?(external_id: external_key, connector_id: 'prometheus')
+        case alert['status']
+        when 'resolved', 'Resolve'
+          issue_repository.add_notes(external_key, "Инцидент завершён:\n#{format_payload(alert)}")
+        when 'firing', 'Problem'
+          issue_repository.add_notes(external_key, "Новое состояние:\n#{format_payload(alert)}")
+        end
+      elsif alert['status'] != 'resolved'
+        external_attributes = RedmineBridge::ExternalAttributes.new(
+          id: external_key,
+          url: '',
+          priority_id: alert.dig('labels', 'severity')
+        )
+
+        title = alert.dig('labels', 'alertname')
+        issue_repository.create(external_attributes,
+                                project_id: project.id,
+                                subject: "Prometheus: #{title}",
+                                description: format_payload(alert),
+                                tracker: Tracker.first,
+                                author: User.anonymous)
       end
-    elsif params['status'] != 'resolved'
-      external_attributes = RedmineBridge::ExternalAttributes.new(
-        id: external_key,
-        url: '',
-        priority_id: params['alerts'].first.dig('labels', 'severity')
-      )
-
-      title = params.dig('commonAnnotations', 'summary').presence || params.dig('commonLabels', 'alertname')
-      issue_repository.create(external_attributes,
-                              project_id: project.id,
-                              subject: "Prometheus: #{title}",
-                              description: format_payload(params),
-                              tracker: Tracker.first,
-                              author: User.anonymous)
     end
   end
 
@@ -43,8 +46,8 @@ class RedmineBridge::PrometheusConnector
 
   def format_payload(payload)
     locals = {
-      start_time: payload['alerts'].first['startsAt'],
-      common_annotations: payload['commonAnnotations'],
+      start_time: payload['startsAt'],
+      annotations: payload['annotations'],
       external_url: payload['externalURL']
     }
     raise ArgumentError if locals.values.all?(&:blank?)
