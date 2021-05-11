@@ -12,7 +12,7 @@ class RedmineBridge::PrometheusConnector
 
     params['alerts'].each do |alert|
       alert = alert.merge(params.slice('externalURL'))
-      external_key = "#{alert['fingerprint']}.#{alert['externalURL']}"
+      external_key = "#{alert.dig('labels', 'alertname')}.#{alert['externalURL']}"
 
       external_issue = ExternalIssue.find_by(external_id: external_key)
       external_issue.destroy! if external_issue&.redmine_issue&.closed?
