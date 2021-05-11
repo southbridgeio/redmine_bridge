@@ -26,9 +26,11 @@ class RedmineBridge::PrometheusConnector
         url: '',
         priority_id: params['alerts'].first.dig('labels', 'severity')
       )
+
+      title = params.dig('commonAnnotations', 'summary').presence || params.dig('commonLabels', 'alertname')
       issue_repository.create(external_attributes,
                               project_id: project.id,
-                              subject: "Prometheus: #{params.dig('commonAnnotations', 'summary')}",
+                              subject: "Prometheus: #{title}",
                               description: format_payload(params),
                               tracker: Tracker.first,
                               author: User.anonymous)
@@ -39,10 +41,9 @@ class RedmineBridge::PrometheusConnector
 
   def format_payload(payload)
     locals = {
-      description: payload.dig('commonAnnotations', 'description'),
       start_time: payload['alerts'].first['startsAt'],
-      dashboard_url: payload.dig('commonAnnotations', 'dashboard'),
-      kb_url: payload.dig('commonAnnotations', 'kb')
+      common_annotations: payload['commonAnnotations'],
+      external_url: payload['externalURL']
     }
     raise ArgumentError if locals.values.all?(&:blank?)
 
