@@ -1,9 +1,9 @@
 class RedmineBridge::JiraConnector
-  def on_issue_update(issue, integration)
+  def on_issue_update(*)
     # TODO
   end
 
-  def on_issue_create(issue)
+  def on_issue_create(*)
     # TODO
   end
 
