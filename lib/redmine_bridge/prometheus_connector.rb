@@ -12,7 +12,7 @@ class RedmineBridge::PrometheusConnector
 
     params['alerts'].each do |alert|
       alert = alert.merge(params.slice('externalURL'))
-      external_key = "#{alert.dig('labels', 'alertname')}.#{alert['externalURL']}"
+      external_key = Digest::MD5.hexdigest("#{alert['labels'].values_at('alertname', 'namespace', 'resource', 'resourcequota').join}#{alert['externalURL']}")
 
       external_issue = ExternalIssue.find_by(external_id: external_key)
       external_issue.destroy! if external_issue&.redmine_issue&.closed?
@@ -31,7 +31,7 @@ class RedmineBridge::PrometheusConnector
           priority_id: alert.dig('labels', 'severity')
         )
 
-        title = alert.dig('labels', 'alertname')
+        title = alert.dig('labels', 'summary').presence || alert.dig('labels', 'alertname')
         issue_repository.create(external_attributes,
                                 project_id: project.id,
                                 subject: "Prometheus: #{title}",
