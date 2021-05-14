@@ -1,54 +1,77 @@
 <% if @bridge_integration.errors.any? %>
-  <% @bridge_integration.errors.full_messages.each do |message|%>
-  <h3><%= message %> </h3>
-  <%end%>
-<%end%></br>
+  <% @bridge_integration.errors.full_messages.each do |message| %>
+    <h3><%= message %> </h3>
+  <% end %>
+  </br>
+<% end %>
 
 <%= form_with(model: @bridge_integration, url: url, method: method) do |form| %>
-  <p><%= form.label 'Имя интеграции' %></p>
-  <p><%= form.text_field 'name' %></p>
+  <div class="box tabular settings">
+    <p>
+      <%= form.label t('redmine_bridge.integration.name') %>
+      <%= form.text_field 'name' %>
+    </p>
 
-  <p><%= form.label 'Ключ интеграции' %></p>
-  <p><%= form.text_field 'key' %></p>
 
-  <p><%= form.label 'Тип интеграции' %></p>
-  <p><%= form.select 'connector_id', RedmineBridge::Registry.keys, {}, id: "connector_id", 'data-initial-value': @bridge_integration.connector_id || RedmineBridge::Registry.keys.first %></p>
+    <p>
+      <%= form.label t('redmine_bridge.integration.key') %>
+      <%= form.text_field 'key' %>
+    </p>
 
-  <p><%= form.label 'Redmine проект' %></p>
-  <p><%= form.select 'project_id', Project.pluck(:name, :id) %></p>
+    <p>
+      <%= form.label t('redmine_bridge.integration.connector') %>
+      <%= form.select 'connector_id', RedmineBridge::Registry.keys, {}, id: "connector_id", 'data-initial-value': @bridge_integration.connector_id || RedmineBridge::Registry.keys.first %>
+    </p>
 
-  <p><%= form.label 'ID проекта интеграции' %></p>
-  <p><%= form.text_field 'settings[connector_project_id]', value: @bridge_integration.settings['connector_project_id'] %></p>
+    <p>
+      <%= form.label t('redmine_bridge.integration.project') %>
+      <%= form.select 'project_id', Project.order(:name).pluck(:name, :id), {}, id: 'project_id_select' %>
+    </p>
 
-  <p><%= form.label 'Настройка статусов:' %></p>
+    <br>
 
-  <% IssueStatus.all.each do |status| %>
-    <p><%= form.label status.name %></p>
-    <p><%= form.text_field "settings[statuses][#{status.id}]", value: @bridge_integration.settings.dig('statuses', status.id.to_s) %></p>
-  <% end %>
+    <p><%= form.label t('redmine_bridge.integration.status_settings') + ':' %></p>
 
-  <p><%= form.label 'Настройка приоритетов:' %></p>
+    <% IssueStatus.all.each do |status| %>
+      <p>
+        <%= form.label status.name %>
+        <%= form.text_field "settings[statuses][#{status.id}]", value: @bridge_integration.settings.dig('statuses', status.id.to_s) %>
+      </p>
+    <% end %>
 
-  <% Enumeration.where(type: 'IssuePriority').each do |enum| %>
-    <p><%= form.label enum.name %></p>
-    <p><%= form.text_field "settings[priorities][#{enum.id}]", value: @bridge_integration.settings.dig('priorities', enum.id.to_s) %></p>
-  <% end %>
+    <br>
 
-  <% RedmineBridge::Registry.keys.each do |key| %>
-    <div id="<%= key %>_form" class="<%= key.to_s == @bridge_integration.connector_id ? nil : 'hidden' %>">
-      <%= render partial: "bridge_integrations/#{key}", locals: { form: form } rescue nil %>
-    </div>
-  <% end %>
+    <p><%= form.label t('redmine_bridge.integration.priority_settings') + ':' %></p>
 
-  <p><%= form.submit %></p>
+    <% Enumeration.where(type: 'IssuePriority').each do |enum| %>
+      <p>
+        <%= form.label enum.name %>
+        <%= form.text_field "settings[priorities][#{enum.id}]", value: @bridge_integration.settings.dig('priorities', enum.id.to_s) %>
+      </p>
+    <% end %>
+
+    <% RedmineBridge::Registry.keys.each do |key| %>
+      <div id="<%= key %>_form" class="<%= key.to_s == @bridge_integration.connector_id ? nil : 'hidden' %>">
+        <%= render partial: "bridge_integrations/#{key}", locals: { form: form } rescue nil %>
+      </div>
+    <% end %>
+  </div>
+
+  <p>
+    <%= form.submit t(@bridge_integration.new_record? ? 'button_create' : 'button_update') %>
+  </p>
 <% end %>
 
 <script>
-  let connector = document.getElementById('connector_id');
+  var connector = document.getElementById('connector_id');
 
   connector.addEventListener('change', (event) => {
     $(`#${connector.dataset.initialValue}_form`).addClass('hidden');
     $(`#${connector.value}_form`).removeClass('hidden');
     connector.dataset.initialValue = connector.value
+  })
+
+  $(document).ready(function () {
+    $('#project_id_select').select2()
   })
 </script>

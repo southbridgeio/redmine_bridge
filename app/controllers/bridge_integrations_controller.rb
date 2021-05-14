@@ -36,9 +36,9 @@ class BridgeIntegrationsController < ApplicationController
     @bridge_integration = ::BridgeIntegration.find(params[:id])
 
     if @bridge_integration.destroy
-      redirect_to '/settings/plugin/redmine_bridge', notice: 'Succesfull deleted'
+      redirect_to '/settings/plugin/redmine_bridge', notice: t('redmine_bridge.deleted')
     else
-      redirect_to '/settings/plugin/redmine_bridge', notice: 'Something went wrong'
+      redirect_to '/settings/plugin/redmine_bridge', notice: t('redmine_bridge.delete_error')
     end
   end
 

@@ -1,28 +1,25 @@
-<h2>Redmine bridge settings</h2>
+<h2><%= t 'redmine_bridge.settings_title' %></h2>
 
-<table>
+<table class="list">
   <thead>
-    <th>Name</th>
-    <th>Key</th>
-    <th>Connector type</th>
-    <th>Project</th>
-    <th>Settings</th>
-    <th>Actions</th>
+    <th><%= t 'redmine_bridge.integration.name' %></th>
+    <th><%= t 'redmine_bridge.integration.connector' %></th>
+    <th><%= t 'redmine_bridge.integration.project' %></th>
+    <th></th>
+    <th></th>
   </thead>
   <tbody>
     <% BridgeIntegration.all.each do |integration| %>
       <tr>
         <td><%= integration.name %></td>
-        <td><%= integration.key %></td>
         <td><%= integration.connector_id %></td>
-        <td><%= integration.project_id %></td>
-        <td><%= integration.settings %></td>
-        <td><%= link_to 'edit', edit_bridge_integration_path(integration) %></td>
-        <td><%= link_to 'destroy', bridge_integration_path(integration), method: :delete %></td>
+        <td><%= integration.project.name %></td>
+        <td><%= link_to '', edit_bridge_integration_path(integration), class: 'icon icon-edit' %></td>
+        <td><%= link_to '', bridge_integration_path(integration), class: 'icon icon-del', method: :delete %></td>
       </tr>
     <% end %>
   </tbody>
 </table>
 
 <br>
-<%= link_to 'New Integration', new_bridge_integration_path %>
+<%= link_to t('redmine_bridge.new_integration'), new_bridge_integration_path, class: 'icon icon-add' %>

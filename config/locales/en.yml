@@ -1,3 +1,15 @@
 # English strings go here for Rails i18n
 en:
-  # my_label: "My label"
+  redmine_bridge:
+    settings_title: Settings
+    new_integration: New integration
+    deleted: Integration deleted
+    delete_error: There was an error on integration delete
+    integration:
+      name: Name
+      key: Key
+      connector: Connector
+      project: Project
+      settings: Settings
+      status_settings: Status settings
+      priority_settings: Priority settings

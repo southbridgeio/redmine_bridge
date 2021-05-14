@@ -1,1 +1,7 @@
+<h2>
+  <%= link_to t('label_module_plural'), '/admin/plugins' %> »
+  <%= link_to 'redmine_bridge', '/settings/plugin/redmine_bridge' %> »
+  <%= @bridge_integration.name %>
+</h2>
+
 <%= render 'form', method: :patch, url: bridge_integration_path(@bridge_integration) %>

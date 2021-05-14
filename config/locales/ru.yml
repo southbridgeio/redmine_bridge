@@ -1,0 +1,15 @@
+# Russian strings go here for Rails i18n
+ru:
+  redmine_bridge:
+    settings_title: Настройки
+    new_integration: Новая интеграция
+    deleted: Интеграция удалена
+    delete_error: При удалении интеграции произошла ошибка
+    integration:
+      name: Название
+      key: Ключ
+      connector: Коннектор
+      project: Проект
+      settings: Настройки
+      status_settings: Настройки статусов
+      priority_settings: Настройки приоритетов
