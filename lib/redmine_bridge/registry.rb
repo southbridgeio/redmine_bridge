@@ -3,7 +3,7 @@
 module RedmineBridge::Registry
   extend Dry::Container::Mixin
 
-  register :jira, RedmineBridge::JiraConnector.new
+  register :jira, RedmineBridge::JiraConnector.new(logger: Rails.logger)
   register :prometheus, RedmineBridge::PrometheusConnector.new
-  register :gitlab, RedmineBridge::GitlabConnector.new
+  register :gitlab, RedmineBridge::GitlabConnector.new(logger: Rails.logger)
 end

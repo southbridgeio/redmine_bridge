@@ -22,6 +22,10 @@ class RedmineBridge::GitlabConnector
 
   using IntegrationRefinements
 
+  def initialize(logger:)
+    @logger = logger
+  end
+
   def on_issue_update(journal:, external_issue:, integration:)
     issue_iid, project_id = external_issue.external_id.split('-')
 
@@ -106,7 +110,7 @@ class RedmineBridge::GitlabConnector
                                      "Задача назначена на #{names.join(', ')}")
         end
       else
-        raise 'Unknown action'
+        logger.warn('Unknown action')
       end
     elsif params['event_type'] == 'note' && params['issue']
       issue_repository.add_notes(params['issue'].values_at('iid', 'project_id').join('-'),
@@ -115,6 +119,8 @@ class RedmineBridge::GitlabConnector
   end
 
   private
+
+  attr_reader :logger
 
   def convert_to_textile(text)
     OmniMarkup.from_gitlab_markdown(text).to_redmine_textile

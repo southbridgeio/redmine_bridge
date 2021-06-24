@@ -54,7 +54,7 @@ class RedmineBridge::PrometheusConnector
 
     ApplicationController.render('redmine_bridge/prometheus/description', layout: false, locals: locals)
   rescue StandardError => e
-    Airbrake.notify(e) if Rails.env.production?
+    Airbrake.notify(e) if defined?(Airbrake) && Rails.env.production?
     "<pre>#{JSON.pretty_generate(payload)}</pre>"
   end
 end

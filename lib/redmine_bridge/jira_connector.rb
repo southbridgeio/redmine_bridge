@@ -1,4 +1,8 @@
 class RedmineBridge::JiraConnector
+  def initialize(logger:)
+    @logger = logger
+  end
+
   def on_issue_update(*)
     # TODO
   end
@@ -42,7 +46,11 @@ class RedmineBridge::JiraConnector
       issue_repository.add_notes(params.dig('issue', 'id'),
                                  "Автор: #{params.dig('user', 'displayName')}\n<pre>#{params.dig('issue', 'fields', 'comment', 'comments').last['body']}</pre>")
     else
-      raise "Unknown event (#{params['issue_event_type_name']})"
+      logger.warn("Unknown event (#{params['issue_event_type_name']})")
     end
   end
+
+  private
+
+  attr_reader :logger
 end
