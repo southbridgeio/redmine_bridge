@@ -12,7 +12,8 @@ class RedmineBridge::PrometheusConnector
     common_labels = params['commonLabels'] || {}
 
     Array.wrap(params['alerts']).each do |alert|
-      next if alert.dig('labels', 'alertname') == 'Watchdog'
+      alert_name = alert.dig('labels', 'alertname')
+      next if alert_name == 'Watchdog' && alert['status'] == 'firing'
 
       alert = alert.merge(params.slice('externalURL'))
       external_key = Digest::MD5.hexdigest("#{alert['labels'].values_at('alertname', 'namespace', 'resource', 'resourcequota').join}#{alert['externalURL']}")
