@@ -9,8 +9,11 @@ class RedmineBridge::PrometheusConnector
 
   def on_webhook_event(integration:, params:, issue_repository:)
     project = integration.project
+    common_labels = params['commonLabels'] || {}
 
-    params['alerts'].each do |alert|
+    Array.wrap(params['alerts']).each do |alert|
+      next if alert.dig('labels', 'alertname') == 'Watchdog'
+
       alert = alert.merge(params.slice('externalURL'))
       external_key = Digest::MD5.hexdigest("#{alert['labels'].values_at('alertname', 'namespace', 'resource', 'resourcequota').join}#{alert['externalURL']}")
 
@@ -31,10 +34,13 @@ class RedmineBridge::PrometheusConnector
           priority_id: alert.dig('labels', 'severity')
         )
 
-        title = alert.dig('annotations', 'summary').presence || alert.dig('labels', 'alertname')
+        alert_title = alert.dig('annotations', 'summary').presence || alert.dig('labels', 'alertname')
+        stage = common_labels['cluster'].present? ? "#{common_labels['cluster']}:" : nil
+        subject = [stage, alert_title].compact.join(' ')
+
         issue_repository.create(external_attributes,
                                 project_id: project.id,
-                                subject: "Prometheus: #{title}",
+                                subject: subject,
                                 description: format_payload(alert),
                                 tracker: Tracker.first,
                                 author: User.anonymous)
