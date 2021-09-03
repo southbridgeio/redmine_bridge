@@ -12,23 +12,27 @@ class RedmineBridge::PrometheusConnector
     common_labels = params['commonLabels'] || {}
 
     Array.wrap(params['alerts']).each do |alert|
-      alert_name = alert.dig('labels', 'alertname')
-      next if alert_name == 'Watchdog' && alert['status'] == 'firing'
-
       alert = alert.merge(params.slice('externalURL'))
       external_key = Digest::MD5.hexdigest("#{alert['labels'].values_at('alertname', 'namespace', 'resource', 'resourcequota').join}#{alert['externalURL']}")
 
       external_issue = ExternalIssue.find_by(external_id: external_key)
       external_issue.destroy! if external_issue&.redmine_issue&.closed?
 
+      alert_name = alert.dig('labels', 'alertname')
+      alert_status = if alert_name == 'Watchdog'
+                       alert['status'] == 'resolved' ? 'firing' : 'resolved'
+                     else
+                       alert['status']
+                     end
+
       if ExternalIssue.exists?(external_id: external_key, connector_id: 'prometheus')
-        case alert['status']
+        case alert_status
         when 'resolved', 'Resolve'
           issue_repository.add_notes(external_key, "Инцидент завершён:\n#{format_payload(alert)}")
         when 'firing', 'Problem'
           issue_repository.add_notes(external_key, "Новое состояние:\n#{format_payload(alert)}")
         end
-      elsif alert['status'] != 'resolved'
+      elsif alert_status != 'resolved'
         external_attributes = RedmineBridge::ExternalAttributes.new(
           id: external_key,
           url: '',
