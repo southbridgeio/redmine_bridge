@@ -1,7 +1,11 @@
 ==> <%= external_url %>
 
 <% annotations.each do |key, value| %>
+<% if links.include?(key) %>
+*<%= key %>*: <%= value.strip %>
+<% else %>
 *<%= key %>*: @<%= value.strip %>@
+<% end %>
 <% end %>
 
 
