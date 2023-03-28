@@ -4,7 +4,9 @@
 class RedmineBridge::WebhookController < ActionController::API
   def create
     key = params[:key] || request.headers['X-Gitlab-Token'] || request.headers['Authorization']&.gsub(/^Bearer /, '')
-    integration = BridgeIntegration.find_by!(key: key)
+    integration = BridgeIntegration.find_by(key: key)
+
+    return head :forbidden unless integration
 
     RedmineBridge::WebhookJob.perform_later(integration, request.request_parameters)
 
