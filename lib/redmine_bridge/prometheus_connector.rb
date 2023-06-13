@@ -1,4 +1,9 @@
 class RedmineBridge::PrometheusConnector
+  def initialize(logger: Rails.logger, integration:)
+    @logger = logger
+    @integration = integration
+  end
+
   def on_issue_update(*)
     # TODO
   end
@@ -7,7 +12,15 @@ class RedmineBridge::PrometheusConnector
     # TODO
   end
 
-  def on_webhook_event(integration:, params:, issue_repository:)
+  def on_comment_create(*)
+    # TODO
+  end
+
+  def on_comment_update(*)
+    # TODO
+  end
+
+  def on_webhook_event(params:, issue_repository:)
     project = integration.project
 
     params['alerts'].each do |alert|
@@ -43,6 +56,8 @@ class RedmineBridge::PrometheusConnector
   end
 
   private
+
+  attr_reader :logger, :integration
 
   def format_payload(payload)
     locals = {

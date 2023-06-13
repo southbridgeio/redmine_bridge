@@ -22,11 +22,12 @@ class RedmineBridge::GitlabConnector
 
   using IntegrationRefinements
 
-  def initialize(logger:)
+  def initialize(logger: Rails.logger, integration:)
     @logger = logger
+    @integration = integration
   end
 
-  def on_issue_update(journal:, external_issue:, integration:)
+  def on_issue_update(journal:, external_issue:)
     issue_iid, project_id = external_issue.external_id.split('-')
 
     if journal.notes.present?
@@ -61,11 +62,19 @@ class RedmineBridge::GitlabConnector
     integration.update_gitlab_issue(project_id, issue_iid, gitlab_params)
   end
 
-  def on_issue_create(issue)
+  def on_issue_create(*)
     # TODO
   end
 
-  def on_webhook_event(integration:, params:, issue_repository:)
+  def on_comment_create(*)
+    # TODO
+  end
+
+  def on_comment_update(*)
+    # TODO
+  end
+
+  def on_webhook_event(params:, issue_repository:)
     # TODO
     return if params.dig('user', 'email')&.include?('@example.com')
 
@@ -120,7 +129,7 @@ class RedmineBridge::GitlabConnector
 
   private
 
-  attr_reader :logger
+  attr_reader :logger, :integration
 
   def convert_to_textile(text)
     OmniMarkup.from_gitlab_markdown(text).to_redmine_textile
