@@ -17,12 +17,18 @@ class RedmineBridge::JiraConnector
   end
 
   def on_issue_update(external_issue:, journal:)
-    sync_operation(external_issue) do
-      update_issue_in_jira(external_issue)
-    end
     if journal.notes.present?
       external_comment = integration.external_comments.create!(redmine_id: journal.id, connector_id: integration.connector_id, external_issue: external_issue)
-      on_comment_create(external_comment: external_comment, journal: journal)
+      begin
+        on_comment_create(external_comment: external_comment, journal: journal)
+      rescue StandardError => e
+        Airbrake.notify(e) if defined?(Airbrake) && Rails.env.production?
+        external_comment.fail!
+      end
+    end
+    # could be projects, where you have the rights to comment, but don't have for edit issue
+    sync_operation(external_issue) do
+      update_issue_in_jira(external_issue)
     end
   end
 
