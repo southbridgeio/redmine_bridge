@@ -56,8 +56,10 @@ class RedmineBridge::IssueRepository
     issue = ExternalIssue.find_by(external_id: external_id, connector_id: connector_id)&.redmine_issue
     return unless issue
 
-    issue.init_journal(User.anonymous, notes)
+    journal = issue.init_journal(User.anonymous, notes)
     issue.save!
+
+    broadcast_issue_updated(issue, journal)
   end
 
   def add_or_update_comment(issue_id, comment_id, notes)
