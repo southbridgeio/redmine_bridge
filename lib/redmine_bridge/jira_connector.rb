@@ -22,7 +22,7 @@ class RedmineBridge::JiraConnector
       begin
         on_comment_create(external_comment: external_comment, journal: journal)
       rescue StandardError => e
-        Airbrake.notify(e)
+        Airbrake.notify(e) if defined?(Airbrake) && Rails.env.production?
         external_comment.fail!
       end
     end

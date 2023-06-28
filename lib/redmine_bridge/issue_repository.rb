@@ -20,7 +20,7 @@ class RedmineBridge::IssueRepository
                             bridge_integration: integration,
                             external_url: external_attributes.url)
     end
-    broadcast_issue_created(external_issue)
+    broadcast_issue_created(issue)
   end
 
   def update(external_attributes, **params)
@@ -46,7 +46,7 @@ class RedmineBridge::IssueRepository
 
     issue.save!
 
-    broadcast_issue_updated(external_issue, journal)
+    broadcast_issue_updated(issue, journal)
   end
 
   # Is keeped to compatibility with prometheus
@@ -91,16 +91,20 @@ class RedmineBridge::IssueRepository
 
   attr_reader :integration
 
-  def broadcast_issue_created(external_issue)
+  def broadcast_issue_created(issue)
     bridge_integrations = BridgeIntegration.where(project_id: integration.project_id)
     bridge_integrations.select { |bi| bi.id != integration.id }.each do |bi|
+      external_issue = bi.external_issues.create!(redmine_id: issue.id, connector_id: bi.connector_id)
       RedmineBridge::IssueCreateJob.perform_later(bi, external_issue)
     end
   end
 
-  def broadcast_issue_updated(external_issue, journal)
+  def broadcast_issue_updated(issue, journal)
     bridge_integrations = BridgeIntegration.where(project_id: integration.project_id)
     bridge_integrations.select { |bi| bi.id != integration.id }.each do |bi|
+      external_issue = ExternalIssue.find_by(redmine_id: issue.id, connector_id: bi.connector_id)
+      next unless external_issue
+
       RedmineBridge::IssueUpdateJob.perform_later(bi, external_issue, journal)
     end
   end
