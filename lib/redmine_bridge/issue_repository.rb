@@ -12,14 +12,16 @@ class RedmineBridge::IssueRepository
                                                          connector_id: connector_id)
     return if external_issue
 
-    ActiveRecord::Base.transaction do
-      issue = Issue.create!(params.merge(status_id: status_id, priority_id: priority_id).compact)
-      ExternalIssue.create!(redmine_id: issue.id,
-                            connector_id: connector_id,
-                            external_id: external_attributes.id,
-                            bridge_integration: integration,
-                            external_url: external_attributes.url)
-    end
+    issue =
+      ActiveRecord::Base.transaction do
+        issue = Issue.create!(params.merge(status_id: status_id, priority_id: priority_id).compact)
+        ExternalIssue.create!(redmine_id: issue.id,
+                              connector_id: connector_id,
+                              external_id: external_attributes.id,
+                              bridge_integration: integration,
+                              external_url: external_attributes.url)
+        issue
+      end
     broadcast_issue_created(issue)
   end
 
