@@ -97,20 +97,26 @@ class RedmineBridge::IssueRepository
 
   def broadcast_issue_created(issue)
     bridge_integrations = BridgeIntegration.where(project_id: integration.project_id)
-    bridge_integrations.select { |bi| bi.id != integration.id }.each do |bi|
-      external_issue = bi.external_issues.create!(redmine_id: issue.id, connector_id: bi.connector_id)
-      RedmineBridge::IssueCreateJob.perform_later(bi, external_issue)
-    end
+    # делаем broadcast только в jira, т.к. gitlab ждет апдейтов только у своих ишьюсов
+    bridge_integrations
+      .select { |bi| bi.connector_id == 'jira' }
+      .select { |bi| bi.id != integration.id }.each do |bi|
+        external_issue = bi.external_issues.create!(redmine_id: issue.id, connector_id: bi.connector_id)
+        RedmineBridge::IssueCreateJob.perform_later(bi, external_issue)
+      end
   end
 
   def broadcast_issue_updated(issue, journal)
     bridge_integrations = BridgeIntegration.where(project_id: integration.project_id)
-    bridge_integrations.select { |bi| bi.id != integration.id }.each do |bi|
-      external_issue = ExternalIssue.find_by(redmine_id: issue.id, connector_id: bi.connector_id)
-      next unless external_issue
+    # делаем broadcast только в jira, т.к. gitlab ждет апдейтов только у своих ишьюсов
+    bridge_integrations
+      .select { |bi| bi.connector_id == 'jira' }
+      .select { |bi| bi.id != integration.id }.each do |bi|
+        external_issue = ExternalIssue.find_by(redmine_id: issue.id, connector_id: bi.connector_id)
+        next unless external_issue
 
-      RedmineBridge::IssueUpdateJob.perform_later(bi, external_issue, journal)
-    end
+        RedmineBridge::IssueUpdateJob.perform_later(bi, external_issue, journal)
+      end
   end
 
   def connector_id
