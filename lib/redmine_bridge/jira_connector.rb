@@ -139,7 +139,6 @@ class RedmineBridge::JiraConnector
 
   def create_issue_in_jira(external_issue)
     issue = external_issue.redmine_issue
-    integration = BridgeIntegration.find_by(project_id: issue.project_id)
     status_id = integration.statuses[issue.status_id.to_s]
     # priority_id = integration.priorities[issue.priority_id.to_s]
 
