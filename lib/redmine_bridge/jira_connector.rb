@@ -92,6 +92,8 @@ class RedmineBridge::JiraConnector
     processed =
       case params['webhookEvent']
       when 'comment_created', 'comment_updated'
+        # 'comment_created' from Jira Server could come without 'issue' in params
+        # And it sends 'issue_commented' simultaniously
         handle_comments_webhook(params, issue_repository)
       end
 

@@ -26,6 +26,8 @@ class RedmineBridge::PrometheusConnector
 
     Array.wrap(params['alerts']).each do |alert|
       alert = alert.merge(params.slice('externalURL'))
+      # TODO: это надо проверить, что нет пересечений(что какие-то уникальные параметры
+      # есть, время там или т.п.)
       external_key = Digest::MD5.hexdigest("#{alert['labels'].values_at('alertname', 'namespace', 'resource', 'resourcequota').join}#{alert['externalURL']}")
 
       external_issue = ExternalIssue.find_by(external_id: external_key)
