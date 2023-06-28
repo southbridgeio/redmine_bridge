@@ -54,6 +54,11 @@ class RedmineBridge::IssueRepository
   end
 
   def add_or_update_comment(issue_id, comment_id, notes)
+    if issue_id.blank? || comment_id.blank?
+      Rails.logger.warn "Issue id: #{issue_id} or comment id: #{comment_id} is blank"
+      return
+    end
+
     issue = integration.external_issues.find_by(external_id: issue_id, connector_id: connector_id)&.redmine_issue
     return unless issue
 
