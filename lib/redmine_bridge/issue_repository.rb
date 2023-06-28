@@ -20,28 +20,33 @@ class RedmineBridge::IssueRepository
                             bridge_integration: integration,
                             external_url: external_attributes.url)
     end
+    broadcast_issue_created(external_issue)
   end
 
   def update(external_attributes, **params)
-    issue =
+    external_issue =
       if connector_id == 'jira'
-        integration.external_issues.find_by(external_id: external_attributes.id, connector_id: connector_id)&.redmine_issue
+        integration.external_issues.find_by(external_id: external_attributes.id, connector_id: connector_id)
       else
         # TODO: we need to find these issue from integration too. But to do that we need to update database
-        ExternalIssue.find_by(external_id: external_attributes.id, connector_id: connector_id)&.redmine_issue
+        ExternalIssue.find_by(external_id: external_attributes.id, connector_id: connector_id)
       end
+
+    issue = external_issue&.redmine_issue
 
     return unless issue
 
     status_id = integration.statuses.reject { |_k, v| v.blank? }.invert[external_attributes.status_id.to_s]
     priority_id = integration.priorities.reject { |_k, v| v.blank? }.invert[external_attributes.priority_id.to_s]
 
-    issue.init_journal(User.anonymous)
+    journal = issue.init_journal(User.anonymous)
     issue.assign_attributes(params.merge(status_id: status_id, priority_id: priority_id).compact)
 
     return unless issue.changed?
 
     issue.save!
+
+    broadcast_issue_updated(external_issue, journal)
   end
 
   # Is keeped to compatibility with prometheus
@@ -85,6 +90,20 @@ class RedmineBridge::IssueRepository
   private
 
   attr_reader :integration
+
+  def broadcast_issue_created(external_issue)
+    bridge_integrations = BridgeIntegration.where(project_id: integration.project_id)
+    bridge_integrations.select { |bi| bi.id != integration.id }.each do |bi|
+      RedmineBridge::IssueCreateJob.perform_later(bi, external_issue)
+    end
+  end
+
+  def broadcast_issue_updated(external_issue, journal)
+    bridge_integrations = BridgeIntegration.where(project_id: integration.project_id)
+    bridge_integrations.select { |bi| bi.id != integration.id }.each do |bi|
+      RedmineBridge::IssueUpdateJob.perform_later(bi, external_issue, journal)
+    end
+  end
 
   def connector_id
     integration.connector_id
