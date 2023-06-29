@@ -25,8 +25,10 @@ bundle exec rake redmine:plugins:migrate RAILS_ENV=production
 
 You need username and password for Jira Server(self hosted). You need username and API token for Jira Cloud(https://support.atlassian.com/atlassian-account/docs/manage-api-tokens-for-your-atlassian-account/).
 
-You can find statuses from page  like https://myorgname.atlassian.net/secure/admin/ViewStatuses.jspa
-(1) Assuming you have Jira Admin rights, then you can access Jira Administration > Issues > Statuses. You can then hover the "Edit" option under the ACTION column to see each status's ID (The link should show up at the bottom left of your screen).)
+You can find statuses, priorities and issue type from urls(your should be logged in):
+http://JIRA_HOST/rest/api/2/status
+http://JIRA_HOST/rest/api/2/priority
+http://JIRA_HOST/rest/api/2/issuetype
 
 ## License
 
