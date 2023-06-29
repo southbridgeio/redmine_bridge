@@ -1,11 +1,9 @@
-class ExternalIssue < ActiveRecord::Base
+class ExternalComment < ActiveRecord::Base
   include AASM
-  # TODO: add paper_trail? or audited. Or we should make journals?
 
-  belongs_to :redmine_issue, foreign_key: 'redmine_id', class_name: 'Issue'
+  belongs_to :redmine_journal, foreign_key: 'redmine_id', class_name: 'Journal'
+  belongs_to :external_issue, foreign_key: 'external_issue_id', class_name: 'ExternalIssue'
   # TODO: optional because it's used only in JIRA for now
-  # We need bridge_integration, because we have only external_id from outside - and it
-  # could be the same for different redmine issues in different projects
   belongs_to :bridge_integration, foreign_key: 'bridge_integration_id', class_name: 'BridgeIntegration', optional: true
 
   aasm column: 'state' do

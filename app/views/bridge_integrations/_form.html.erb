@@ -65,13 +65,18 @@
 <script>
   var connector = document.getElementById('connector_id');
 
-  connector.addEventListener('change', (event) => {
+  function toggleForm() {
     $(`#${connector.dataset.initialValue}_form`).addClass('hidden');
     $(`#${connector.value}_form`).removeClass('hidden');
     connector.dataset.initialValue = connector.value
+  }
+
+  connector.addEventListener('change', (event) => {
+    toggleForm()
   })
 
   $(document).ready(function () {
     $('#project_id_select').select2()
+    toggleForm()
   })
 </script>

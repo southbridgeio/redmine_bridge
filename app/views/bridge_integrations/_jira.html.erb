@@ -1,0 +1,26 @@
+<br>
+
+<p>
+  <%= form.label 'settings[jira_project_key]', 'ID проекта в Jira' %>
+  <%= form.text_field 'settings[jira_project_key]', value: @bridge_integration.settings['jira_project_key'] %>
+</p>
+
+<p>
+  <%= form.label 'settings[jira_username]', 'Юзер для API' %>
+  <%= form.text_field 'settings[jira_username]', value: @bridge_integration.settings['jira_username'] %>
+</p>
+
+<p>
+  <%= form.label 'settings[jira_password]', 'Пароль(или токен) для API' %>
+  <%= form.text_field 'settings[jira_password]', type: 'password', value: @bridge_integration.settings['jira_password'] %>
+</p>
+
+<p>
+  <%= form.label 'settings[jira_base_url]', 'Base URL хоста с JIRA' %>
+  <%= form.text_field 'settings[jira_base_url]', value: @bridge_integration.settings['jira_base_url'] %>
+</p>
+
+<p>
+  <%= form.label 'settings[jira_issue_type_id]', 'IssueType Id(тип, с которым будут создаваться задачи в jira)' %>
+  <%= form.text_field 'settings[jira_issue_type_id]', value: @bridge_integration.settings['jira_issue_type_id'] %>
+</p>

@@ -1,4 +1,9 @@
 class RedmineBridge::PrometheusConnector
+  def initialize(logger: Rails.logger, integration:)
+    @logger = logger
+    @integration = integration
+  end
+
   def on_issue_update(*)
     # TODO
   end
@@ -7,11 +12,21 @@ class RedmineBridge::PrometheusConnector
     # TODO
   end
 
-  def on_webhook_event(integration:, params:, issue_repository:)
+  def on_comment_create(*)
+    # TODO
+  end
+
+  def on_comment_update(*)
+    # TODO
+  end
+
+  def on_webhook_event(params:, issue_repository:)
     project = integration.project
 
     params['alerts'].each do |alert|
       alert = alert.merge(params.slice('externalURL'))
+      # TODO: это надо проверить, что нет пересечений(что какие-то уникальные параметры
+      # есть, время там или т.п.)
       external_key = Digest::MD5.hexdigest("#{alert['labels'].values_at('alertname', 'namespace', 'resource', 'resourcequota').join}#{alert['externalURL']}")
 
       external_issue = ExternalIssue.find_by(external_id: external_key)
@@ -43,6 +58,8 @@ class RedmineBridge::PrometheusConnector
   end
 
   private
+
+  attr_reader :logger, :integration
 
   def format_payload(payload)
     locals = {

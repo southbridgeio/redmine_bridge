@@ -8,7 +8,10 @@ class RedmineBridge::WebhookController < ActionController::API
 
     return head :forbidden unless integration
 
-    RedmineBridge::WebhookJob.perform_later(integration, request.request_parameters)
+    # wait 3 seconds - because we have race conditions, when we create jira issue,
+    # got webhook about creation, but not yet save in database external_id with created
+    # jira issue id. Which causes duplications
+    RedmineBridge::WebhookJob.set(wait: 3.seconds).perform_later(integration, request.request_parameters)
 
     render json: {}
   end
