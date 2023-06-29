@@ -26,7 +26,7 @@ class ExternalComment < ActiveRecord::Base
     end
 
     event :fail do
-      transitions from: [:pending, :syncing], to: :failed
+      transitions to: :failed
     end
   end
 end
