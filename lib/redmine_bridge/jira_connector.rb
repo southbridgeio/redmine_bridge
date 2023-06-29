@@ -18,12 +18,11 @@ class RedmineBridge::JiraConnector
 
   def on_issue_update(external_issue:, journal:)
     if journal.notes.present?
-      external_comment = integration.external_comments.create!(redmine_id: journal.id, connector_id: integration.connector_id, external_issue: external_issue)
       begin
-        on_comment_create(external_comment: external_comment, journal: journal)
+        external_comment = integration.external_comments.find_or_create_by!(redmine_id: journal.id, connector_id: integration.connector_id, external_issue: external_issue)
+        on_comment_create(external_comment: external_comment, journal: journal) if external_comment.external_id.blank?
       rescue StandardError => e
         Airbrake.notify(e) if defined?(Airbrake) && Rails.env.production?
-        external_comment.fail!
       end
     end
     # could be projects, where you have the rights to comment, but don't have for edit issue
@@ -36,6 +35,9 @@ class RedmineBridge::JiraConnector
     return external_comment.skip! if external_comment.redmine_journal.notes.blank?
 
     sync_operation(external_comment) do
+      external_comment.origin = 'redmine'
+      external_comment.save!
+
       jira_comment = create_comment_in_jira(external_comment)
       external_issue = external_comment.external_issue
       external_url = external_issue.external_url + '?focusedCommentId=' + jira_comment.id.to_s
@@ -212,6 +214,7 @@ class RedmineBridge::JiraConnector
   end
 
   def update_status_in_jira(jira_issue, status_id)
+    return if status_id.nil?
     # jira_issue.attrs['fields'] - to check that is issue is new or not. In new issues
     # jira_issue.status raises exception
     return if jira_issue.attrs['fields'] && jira_issue.status.id.to_s == status_id.to_s

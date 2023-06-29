@@ -75,7 +75,7 @@ class RedmineBridge::IssueRepository
     comment = external_comment.redmine_journal
 
     if comment
-      unless comment.user.nil? || comment.user.anonymous?
+      if !(comment.user.nil? || comment.user.anonymous?) || external_comment.origin == 'redmine'
         # Don't change comments from redmine users by hooks. They happen in the case:
         # Create comment in redmine. It creates comment in Jira. Webhook comes from jira
         # about comment creation.
@@ -115,7 +115,10 @@ class RedmineBridge::IssueRepository
         external_issue = ExternalIssue.find_by(redmine_id: issue.id, connector_id: bi.connector_id)
         next unless external_issue
 
-        RedmineBridge::IssueUpdateJob.perform_later(bi, external_issue, journal)
+        # Timeout so jira create issue task will have time to complete before
+        # comment creation task will creates(prometheus creates task and first comment
+        # almost simultaneously)
+        RedmineBridge::IssueUpdateJob.set(wait: 3.seconds).perform_later(bi, external_issue, journal)
       end
   end
 
