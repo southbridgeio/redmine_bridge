@@ -76,7 +76,7 @@ class RedmineBridge::PrometheusConnector
     locals = {
       start_time: payload['startsAt'],
       annotations: payload['annotations'],
-      links: %w[grafana prometheus alertmanager kibana runbook_url kb],
+      links: %w[grafana prometheus alertmanager kibana runbook_url kb graylog],
       external_url: payload['annotations']['alertmanager'] || payload['externalURL']
     }
     raise ArgumentError if locals.values.all?(&:blank?)
