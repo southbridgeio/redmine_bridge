@@ -134,7 +134,16 @@ class RedmineBridge::JiraConnector
 
     external_entity.sync_errors = e.try(:response).try(:body)
     external_entity.fail!
-    raise e
+
+    # Jira's user could not have rights to edit issues or move their status.
+    # But it's not the reason to retry the job, so don't reraise exception here.
+    access_editing_error = e.try(:response).try(:body).to_s.include?('It is not on the appropriate screen, or unknown')
+    if access_editing_error
+      logger.info "Integration #{integration.id} don't have rights to edit #{external_entity.redmine_id}"
+      return
+    else
+      raise e
+    end
   end
 
   def handle_comments_webhook(params, issue_repository)
