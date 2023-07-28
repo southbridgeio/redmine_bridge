@@ -24,3 +24,8 @@
   <%= form.label 'settings[jira_issue_type_id]', 'IssueType Id(тип, с которым будут создаваться задачи в jira)' %>
   <%= form.text_field 'settings[jira_issue_type_id]', value: @bridge_integration.settings['jira_issue_type_id'] %>
 </p>
+
+<p>
+  <%= form.label 'settings[ignore_tls_errors]', 'Игнорировать ошибки TLS' %>
+  <%= form.check_box 'settings[ignore_tls_errors]', checked: @bridge_integration.settings['ignore_tls_errors'] == '1' %>
+</p>
