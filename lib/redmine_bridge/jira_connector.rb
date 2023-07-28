@@ -242,15 +242,19 @@ class RedmineBridge::JiraConnector
     username = integration.settings['jira_username']
     password = integration.settings['jira_password']
     site = integration.settings['jira_base_url']
-    @jira_client ||=
-      JIRA::Client.new(
-        username: username,
-        password: password,
-        site: site,
-        context_path: '',
-        auth_type: :basic,
-        read_timeout: 120
-      )
+    params = {
+      username: username,
+      password: password,
+      site: site,
+      context_path: '',
+      auth_type: :basic,
+      read_timeout: 120
+    }
+    if integration.settings['ignore_tls_errors'] == '1'
+      params[:use_ssl] = true
+      params[:ssl_verify_mode] = OpenSSL::SSL::VERIFY_NONE
+    end
+    @jira_client ||= JIRA::Client.new(params)
   end
 
   def connector_id
