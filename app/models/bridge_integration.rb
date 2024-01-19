@@ -15,4 +15,16 @@ class BridgeIntegration < ActiveRecord::Base
             :project_id,
             :statuses,
             :priorities, presence: true
+
+  validates :key, uniqueness: true, if: Proc.new { |integration| integration.connector_id.in?(%w[jira gitlab]) }
+  validate :prometheus_bridge_integration_uniqueness, if: Proc.new { |integration| integration.connector_id == 'prometheus' }
+
+  private
+
+  # We allow multiple prometheus integrations with same key, but keys should be uniq for other connectors
+  def prometheus_bridge_integration_uniqueness
+    if BridgeIntegration.find_by("key = ? AND connector_id != ?", key, 'prometheus')
+      errors.add(:base, l('redmine_bridge.errors.prometheus_key_uniqueness'))
+    end
+  end
 end
