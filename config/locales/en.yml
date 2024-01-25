@@ -13,5 +13,5 @@ en:
       settings: Settings
       status_settings: Status settings
       priority_settings: Priority settings
-    errors:
-      prometheus_key_uniqueness: This key is already in use with another connector
+      default_project: Default project
+      default_project_title: Use this project only for Southbridge monitoring system (check documentation)

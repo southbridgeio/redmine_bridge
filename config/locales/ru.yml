@@ -13,5 +13,5 @@ ru:
       settings: Настройки
       status_settings: Настройки статусов
       priority_settings: Настройки приоритетов
-    errors:
-      prometheus_key_uniqueness: Этот ключ уже используется с другим коннектором
+      default_project: Проект по умолчанию
+      default_project_title: Используйте этот проект только для системы мониторинга Southbridge (см. документацию)

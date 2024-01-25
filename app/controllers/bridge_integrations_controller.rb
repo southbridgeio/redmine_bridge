@@ -50,6 +50,7 @@ class BridgeIntegrationsController < ApplicationController
       :key,
       :connector_id,
       :project_id,
+      :default_project_id,
       settings: {}
     )
   end

@@ -28,6 +28,11 @@
       <%= form.select 'project_id', Project.order(:name).pluck(:name, :id), {}, id: 'project_id_select' %>
     </p>
 
+    <p>
+      <%= form.label t('redmine_bridge.integration.default_project'), title: t('redmine_bridge.integration.default_project_title') %>
+      <%= form.select 'default_project_id', Project.order(:name).pluck(:name, :id), { include_blank: true }, { id: 'default_project_id_select' } %>
+    </p>
+
     <br>
 
     <p><%= form.label t('redmine_bridge.integration.status_settings') + ':' %></p>
@@ -78,5 +83,10 @@
   $(document).ready(function () {
     $('#project_id_select').select2()
     toggleForm()
+  })
+
+  $(document).ready(function () {
+      $('#default_project_id_select').select2()
+      toggleForm()
   })
 </script>
