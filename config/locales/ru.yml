@@ -13,5 +13,3 @@ ru:
       settings: Настройки
       status_settings: Настройки статусов
       priority_settings: Настройки приоритетов
-    errors:
-      prometheus_key_uniqueness: Этот ключ уже используется с другим коннектором
