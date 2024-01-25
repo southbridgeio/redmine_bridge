@@ -1,4 +1,6 @@
 class RedmineBridge::PrometheusConnector
+  HEXDIGEST_FIELDS = %w[alertname namespace resource resourcequota redmine_project].freeze
+
   def initialize(logger: Rails.logger, integration:)
     @logger = logger
     @integration = integration
@@ -21,14 +23,14 @@ class RedmineBridge::PrometheusConnector
   end
 
   def on_webhook_event(params:, issue_repository:)
-    project = integration.project
+    project = find_project(integration, params)
     common_labels = params['commonLabels'] || {}
 
     Array.wrap(params['alerts']).each do |alert|
       alert = alert.merge(params.slice('externalURL'))
       # TODO: это надо проверить, что нет пересечений(что какие-то уникальные параметры
       # есть, время там или т.п.)
-      external_key = Digest::MD5.hexdigest("#{alert['labels'].values_at('alertname', 'namespace', 'resource', 'resourcequota').join}#{alert['externalURL']}")
+      external_key = Digest::MD5.hexdigest("#{alert['labels'].values_at(*HEXDIGEST_FIELDS).join}#{alert['externalURL']}")
 
       external_issue = ExternalIssue.find_by(external_id: external_key)
       external_issue.destroy! if external_issue&.redmine_issue&.closed?
@@ -85,5 +87,30 @@ class RedmineBridge::PrometheusConnector
   rescue StandardError => e
     Airbrake.notify(e) if defined?(Airbrake) && Rails.env.production?
     "<pre>#{JSON.pretty_generate(payload)}</pre>"
+  end
+
+  def find_project(integration, params)
+    southbridge_project?(params) ? southbridge_project(integration, params) : integration.project
+  end
+
+  def southbridge_project(integration, params)
+    default_project = integration.default_project
+    main_project = integration.project
+    target_project = Project.find_by(identifier: redmine_project(params))
+
+    all_parents(target_project).include?(main_project) ? target_project : default_project || main_project
+  end
+
+  def all_parents(target_project)
+    return [] unless target_project&.parent
+    [target_project, target_project.parent] + all_parents(target_project.parent)
+  end
+
+  def southbridge_project?(params)
+    redmine_project(params).present?
+  end
+
+  def redmine_project(params)
+    @redmine_project ||= params.dig('alerts', 0, 'labels', 'redmine_project')
   end
 end

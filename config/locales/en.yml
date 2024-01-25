@@ -13,3 +13,5 @@ en:
       settings: Settings
       status_settings: Status settings
       priority_settings: Priority settings
+      default_project: Default project
+      default_project_title: Use this project only for Southbridge monitoring system (check documentation)

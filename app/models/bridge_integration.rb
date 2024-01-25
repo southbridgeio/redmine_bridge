@@ -3,6 +3,7 @@
 # Integration model
 class BridgeIntegration < ActiveRecord::Base
   belongs_to :project
+  belongs_to :default_project, class_name: 'Project', optional: true
 
   has_many :external_issues, dependent: :destroy
   has_many :external_comments, dependent: :destroy
