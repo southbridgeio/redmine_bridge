@@ -23,10 +23,10 @@ class RedmineBridge::PrometheusConnector
   end
 
   def on_webhook_event(params:, issue_repository:)
-    project = find_project(integration, params)
     common_labels = params['commonLabels'] || {}
 
     Array.wrap(params['alerts']).each do |alert|
+      project = find_project(integration, alert)
       alert = alert.merge(params.slice('externalURL'))
       # TODO: это надо проверить, что нет пересечений(что какие-то уникальные параметры
       # есть, время там или т.п.)
@@ -89,14 +89,14 @@ class RedmineBridge::PrometheusConnector
     "<pre>#{JSON.pretty_generate(payload)}</pre>"
   end
 
-  def find_project(integration, params)
-    southbridge_project?(params) ? southbridge_project(integration, params) : integration.project
+  def find_project(integration, alert)
+    southbridge_project?(alert) ? southbridge_project(integration, alert) : integration.project
   end
 
-  def southbridge_project(integration, params)
+  def southbridge_project(integration, alert)
     default_project = integration.default_project
     main_project = integration.project
-    target_project = Project.find_by(identifier: redmine_project(params))
+    target_project = Project.find_by(identifier: redmine_project(alert))
 
     all_parents(target_project).include?(main_project) ? target_project : default_project || main_project
   end
@@ -106,11 +106,11 @@ class RedmineBridge::PrometheusConnector
     [target_project, target_project.parent] + all_parents(target_project.parent)
   end
 
-  def southbridge_project?(params)
-    redmine_project(params).present?
+  def southbridge_project?(alert)
+    redmine_project(alert).present?
   end
 
-  def redmine_project(params)
-    @redmine_project ||= params.dig('alerts', 0, 'labels', 'redmine_project')
+  def redmine_project(alert)
+    alert.dig('labels', 'redmine_project')
   end
 end
