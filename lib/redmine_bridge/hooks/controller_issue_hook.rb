@@ -21,6 +21,8 @@ module RedmineBridge
 
       # after issue updation(comments also here)
       def controller_issues_edit_after_save(issue:, journal:, **)
+        return unless journal.id
+
         bridge_integrations = BridgeIntegration.where(project_id: issue.project_id)
         return unless bridge_integrations.present?
 
