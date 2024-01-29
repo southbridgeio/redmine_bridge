@@ -1,5 +1,6 @@
 class RedmineBridge::PrometheusConnector
-  HEXDIGEST_FIELDS = %w[alertname namespace resource resourcequota redmine_project].freeze
+  CLIENTS_HEXDIGEST_FIELDS = %w[alertname namespace resource resourcequota].freeze
+  SOUTHBRIDGE_HEXDIGEST_FIELDS = %w[alertname namespace resource resourcequota redmine_project instance].freeze
 
   def initialize(logger: Rails.logger, integration:)
     @logger = logger
@@ -30,7 +31,8 @@ class RedmineBridge::PrometheusConnector
       alert = alert.merge(params.slice('externalURL'))
       # TODO: это надо проверить, что нет пересечений(что какие-то уникальные параметры
       # есть, время там или т.п.)
-      external_key = Digest::MD5.hexdigest("#{alert['labels'].values_at(*HEXDIGEST_FIELDS).join}#{alert['externalURL']}")
+
+      external_key = find_external_key(alert, integration)
 
       external_issue = ExternalIssue.find_by(external_id: external_key)
       external_issue.destroy! if external_issue&.redmine_issue&.closed?
@@ -90,13 +92,14 @@ class RedmineBridge::PrometheusConnector
   end
 
   def find_project(integration, alert)
-    southbridge_project?(alert) ? southbridge_project(integration, alert) : integration.project
+    integration.southbridge_integration? ? southbridge_project(integration, alert) : integration.project
   end
 
   def southbridge_project(integration, alert)
     default_project = integration.default_project
     main_project = integration.project
-    target_project = Project.find_by(identifier: redmine_project(alert))
+    redmine_project = alert.dig('labels', 'redmine_project')
+    target_project = Project.find_by(identifier: redmine_project)
 
     all_parents(target_project).include?(main_project) ? target_project : default_project || main_project
   end
@@ -106,11 +109,9 @@ class RedmineBridge::PrometheusConnector
     [target_project, target_project.parent] + all_parents(target_project.parent)
   end
 
-  def southbridge_project?(alert)
-    redmine_project(alert).present?
-  end
+  def find_external_key(alert, integration)
+    hexdigest_keys = integration.southbridge_integration? ? SOUTHBRIDGE_HEXDIGEST_FIELDS : CLIENTS_HEXDIGEST_FIELDS
 
-  def redmine_project(alert)
-    alert.dig('labels', 'redmine_project')
+    Digest::MD5.hexdigest("#{alert['labels'].values_at(*hexdigest_keys).join}#{alert['externalURL']}")
   end
 end
