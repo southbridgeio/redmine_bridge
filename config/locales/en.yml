@@ -15,3 +15,5 @@ en:
       priority_settings: Priority settings
       default_project: Default project
       default_project_title: Use this project only for Southbridge monitoring system (check documentation)
+      southbridge_integration: Southbridge integration
+      southbridge_integration_title: Use this setting only for Southbridge monitoring system (check documentation)

@@ -29,6 +29,11 @@
     </p>
 
     <p>
+      <%= form.label t('redmine_bridge.integration.southbridge_integration'), title: t('redmine_bridge.integration.southbridge_integration_title') %>
+      <%= form.check_box 'southbridge_integration', id: 'southbridge_integration_checkbox' %>
+    </p>
+
+    <p>
       <%= form.label t('redmine_bridge.integration.default_project'), title: t('redmine_bridge.integration.default_project_title') %>
       <%= form.select 'default_project_id', Project.order(:name).pluck(:name, :id), { include_blank: true }, { id: 'default_project_id_select' } %>
     </p>
@@ -68,25 +73,45 @@
 <% end %>
 
 <script>
-  var connector = document.getElementById('connector_id');
+    var connector = document.getElementById('connector_id');
 
-  function toggleForm() {
-    $(`#${connector.dataset.initialValue}_form`).addClass('hidden');
-    $(`#${connector.value}_form`).removeClass('hidden');
-    connector.dataset.initialValue = connector.value
-  }
+    function toggleForm() {
+        $(`#${connector.dataset.initialValue}_form`).addClass('hidden');
+        $(`#${connector.value}_form`).removeClass('hidden');
+        connector.dataset.initialValue = connector.value
+    }
 
-  connector.addEventListener('change', (event) => {
-    toggleForm()
-  })
+    connector.addEventListener('change', (event) => {
+        toggleForm()
+    })
 
-  $(document).ready(function () {
-    $('#project_id_select').select2()
-    toggleForm()
-  })
+    $(document).ready(function () {
+        $('#project_id_select').select2()
+        toggleForm()
+    })
 
-  $(document).ready(function () {
-      $('#default_project_id_select').select2()
-      toggleForm()
-  })
+    $(document).ready(function () {
+        $('#default_project_id_select').select2()
+        toggleForm()
+    })
+
+    // script for showing/hiding default_project
+    function toggleDefaultProjectSelector() {
+        var checkbox = document.getElementById('southbridge_integration_checkbox');
+        var selector = document.getElementById('default_project_id_select');
+
+        if (checkbox.checked) {
+            selector.closest('p').style.display = 'block'; // Show the selector
+        } else {
+            selector.closest('p').style.display = 'none'; // Hide the selector
+        }
+    }
+
+    $(document).ready(function () {
+        var checkbox = document.getElementById('southbridge_integration_checkbox');
+        checkbox.addEventListener('change', toggleDefaultProjectSelector);
+
+        // Call the function on page load to set the initial state
+        toggleDefaultProjectSelector();
+    });
 </script>

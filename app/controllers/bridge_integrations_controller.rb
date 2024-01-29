@@ -51,6 +51,7 @@ class BridgeIntegrationsController < ApplicationController
       :connector_id,
       :project_id,
       :default_project_id,
+      :southbridge_integration,
       settings: {}
     )
   end

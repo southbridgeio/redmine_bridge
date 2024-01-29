@@ -15,3 +15,5 @@ ru:
       priority_settings: Настройки приоритетов
       default_project: Проект по умолчанию
       default_project_title: Используйте этот проект только для системы мониторинга Southbridge (см. документацию)
+      southbridge_integration: Southbridge интегарция
+      southbridge_integration_title: Используйте эту настройку только для системы мониторинга Southbridge (см. документацию)
