@@ -60,7 +60,7 @@ class RedmineBridge::PrometheusConnector
 
         alert_title = alert.dig('annotations', 'summary').presence || alert.dig('labels', 'alertname')
         stage = common_labels['cluster'].present? ? "#{common_labels['cluster']}:" : nil
-        subject = [stage, alert_title].compact.join(' ')
+        subject = [stage, alert_title].compact.join(' ').truncate(255)
 
         issue_repository.create(external_attributes,
                                 project_id: project.id,
