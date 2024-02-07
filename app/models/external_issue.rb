@@ -8,6 +8,8 @@ class ExternalIssue < ActiveRecord::Base
   # could be the same for different redmine issues in different projects
   belongs_to :bridge_integration, foreign_key: 'bridge_integration_id', class_name: 'BridgeIntegration', optional: true
 
+  has_many :external_comments, dependent: :destroy
+
   aasm column: 'state' do
     state :pending, initial: true
     state :syncing
