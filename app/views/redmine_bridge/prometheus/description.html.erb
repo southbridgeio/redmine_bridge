@@ -1,14 +1,16 @@
+<% unless comment_block %>
 ==> <%= external_url %>
+<% end %>
 
 <% annotations.each do |key, value| %>
-<% if links.include?(key) %>
-*<%= key %>*: <%= value.strip %>
-<% else %>
-*<%= key %>*: @<%= value.strip %>@
-<% end %>
+<% value = value.sub("\n", "\n\n") if key == 'description' %>
+*<%= key %>*: <%= value.strip + "\n" %>
 <% end %>
 
 
 <% if start_time %>
 *Start time:* <%= start_time.to_time.strftime('%Y.%m.%d %H:%M:%S') %>
+<% if comment_block %>
+*Current time:* <%= Time.now.strftime('%Y.%m.%d %H:%M:%S') %>
+<% end %>
 <% end %>
