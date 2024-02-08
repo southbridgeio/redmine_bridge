@@ -35,9 +35,9 @@ class RedmineBridge::PrometheusConnector
       if ExternalIssue.exists?(external_id: external_key, connector_id: 'prometheus')
         case alert['status']
         when 'resolved', 'Resolve'
-          issue_repository.add_notes(external_key, "Инцидент завершён:\n#{format_payload(alert)}")
+          issue_repository.add_notes(external_key, "*OK*\n#{format_payload(alert, comment_block: true)}")
         when 'firing', 'Problem'
-          issue_repository.add_notes(external_key, "Новое состояние:\n#{format_payload(alert)}")
+          issue_repository.add_notes(external_key, "*PROBLEM*\n#{format_payload(alert, comment_block: true)}")
         end
       elsif alert['status'] != 'resolved'
         external_attributes = RedmineBridge::ExternalAttributes.new(
@@ -61,12 +61,13 @@ class RedmineBridge::PrometheusConnector
 
   attr_reader :logger, :integration
 
-  def format_payload(payload)
+  def format_payload(payload, comment_block: false)
     locals = {
       start_time: payload['startsAt'],
       annotations: payload['annotations'],
       links: %w[grafana prometheus alertmanager kibana runbook_url],
-      external_url: payload['annotations']['alertmanager'] || payload['externalURL']
+      external_url: payload['annotations']['alertmanager'] || payload['externalURL'],
+      comment_block: comment_block
     }
     raise ArgumentError if locals.values.all?(&:blank?)
 
