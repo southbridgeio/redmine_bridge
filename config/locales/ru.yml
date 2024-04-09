@@ -13,3 +13,6 @@ ru:
       settings: Настройки
       status_settings: Настройки статусов
       priority_settings: Настройки приоритетов
+      check_jira_connection: Проверить соединение с JIRA
+      connection_success: Соединение установлено
+      connection_fail: Соединение отсутствует
