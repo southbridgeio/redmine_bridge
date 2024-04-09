@@ -17,3 +17,6 @@ en:
       default_project_title: Use this project only for Southbridge monitoring system (check documentation)
       southbridge_integration: Southbridge integration
       southbridge_integration_title: Use this setting only for Southbridge monitoring system (check documentation)
+      check_jira_connection: Check JIRA connection
+      connection_success: Connection established
+      connection_fail: Connection error
