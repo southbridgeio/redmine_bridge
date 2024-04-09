@@ -42,6 +42,21 @@ class BridgeIntegrationsController < ApplicationController
     end
   end
 
+  def check_connection
+    @bridge_integration = ::BridgeIntegration.find(params[:id])
+
+    connection_result = RedmineBridge::Registry[@bridge_integration.connector_id]
+                          .call(integration: @bridge_integration)
+                          .check_connection
+    if connection_result[:success]
+      redirect_to edit_bridge_integration_path(@bridge_integration),
+                  notice: t('redmine_bridge.integration.connection_success')
+    else
+      redirect_to edit_bridge_integration_path(@bridge_integration),
+                  alert: t('redmine_bridge.integration.connection_fail') + ": #{connection_result[:message]}"
+    end
+  end
+
   private
 
   def strong_params

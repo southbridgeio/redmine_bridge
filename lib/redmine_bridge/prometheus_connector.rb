@@ -23,6 +23,10 @@ class RedmineBridge::PrometheusConnector
     # TODO
   end
 
+  def check_connection
+    raise NotImplementedError
+  end
+
   def on_webhook_event(params:, issue_repository:)
     common_labels = params['commonLabels'] || {}
 

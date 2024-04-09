@@ -62,6 +62,10 @@ class RedmineBridge::GitlabConnector
     integration.update_gitlab_issue(project_id, issue_iid, gitlab_params)
   end
 
+  def check_connection
+    raise NotImplementedError
+  end
+
   def on_issue_create(*)
     # TODO
   end

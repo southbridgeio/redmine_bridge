@@ -110,6 +110,14 @@ class RedmineBridge::JiraConnector
     end
   end
 
+  def check_connection
+    jira_client.ServerInfo.all
+
+    { result: true }
+  rescue => e
+    { result: false, message: e.message }
+  end
+
   private
 
   attr_reader :logger, :jira_client, :integration
@@ -248,8 +256,7 @@ class RedmineBridge::JiraConnector
       site: site,
       context_path: '',
       auth_type: :basic,
-      read_timeout: 120
-    }
+      read_timeout: 120 }
     if integration.settings['ignore_tls_errors'] == '1'
       params[:use_ssl] = true
       params[:ssl_verify_mode] = OpenSSL::SSL::VERIFY_NONE
