@@ -13,3 +13,6 @@ en:
       settings: Settings
       status_settings: Status settings
       priority_settings: Priority settings
+      check_jira_connection: Check JIRA connection
+      connection_success: Connection established
+      connection_fail: Connection error

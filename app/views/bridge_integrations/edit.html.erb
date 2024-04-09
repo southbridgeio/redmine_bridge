@@ -4,4 +4,30 @@
   <%= @bridge_integration.name %>
 </h2>
 
+<p>
+  <%= button_to t('redmine_bridge.integration.check_jira_connection'),
+                check_connection_bridge_integration_path(@bridge_integration), method: :get,
+                id: 'check_jira_connection_button' %>
+</p>
+
 <%= render 'form', method: :patch, url: bridge_integration_path(@bridge_integration) %>
+
+<script>
+    $(document).ready(function () {
+        const jiraConnectorId = 'jira';
+        const connectorId = $('#connector_id');
+        const checkJiraButton = $('#check_jira_connection_button');
+
+        function toggleCheckJiraConnectionButton() {
+            if (connectorId.val() === jiraConnectorId) {
+                checkJiraButton.show();
+            } else {
+                checkJiraButton.hide();
+            }
+        }
+
+        connectorId.on('change', toggleCheckJiraConnectionButton);
+
+        toggleCheckJiraConnectionButton();
+    });
+</script>
