@@ -115,7 +115,7 @@ class RedmineBridge::JiraConnector
 
     { result: true }
   rescue => e
-    { result: false, message: e.message }
+    { result: false, message: "#{e.class}: #{e.message}"}
   end
 
   private
