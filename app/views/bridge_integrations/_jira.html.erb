@@ -29,3 +29,11 @@
   <%= form.label 'settings[ignore_tls_errors]', 'Игнорировать ошибки TLS' %>
   <%= form.check_box 'settings[ignore_tls_errors]', checked: @bridge_integration.settings['ignore_tls_errors'] == '1' %>
 </p>
+
+<p>
+  <%= link_to t('redmine_bridge.integration.check_jira_connection'),
+              check_connection_bridge_integration_path(@bridge_integration),
+              method: :get,
+              id: 'check_jira_connection_button',
+              class: 'link-as-button' %>
+</p>
