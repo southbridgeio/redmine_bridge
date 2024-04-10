@@ -20,3 +20,4 @@ ru:
       check_jira_connection: Проверить соединение с JIRA
       connection_success: Соединение установлено
       connection_fail: Соединение отсутствует
+      connection_timeout: Истекло время ожидания соединения
