@@ -55,6 +55,9 @@ class BridgeIntegrationsController < ApplicationController
       redirect_to edit_bridge_integration_path(@bridge_integration),
                   alert: t('redmine_bridge.integration.connection_fail') + ": #{connection_result[:message]}"
     end
+  rescue Rack::Timeout::RequestTimeoutException
+    redirect_to edit_bridge_integration_path(@bridge_integration),
+                alert: t('redmine_bridge.integration.connection_timeout')
   end
 
   private
