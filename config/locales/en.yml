@@ -16,3 +16,4 @@ en:
       check_jira_connection: Check JIRA connection
       connection_success: Connection established
       connection_fail: Connection error
+      connection_timeout: Connection timeout expired
