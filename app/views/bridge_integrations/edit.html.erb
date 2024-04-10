@@ -4,12 +4,6 @@
   <%= @bridge_integration.name %>
 </h2>
 
-<p>
-  <%= button_to t('redmine_bridge.integration.check_jira_connection'),
-                check_connection_bridge_integration_path(@bridge_integration), method: :get,
-                id: 'check_jira_connection_button' %>
-</p>
-
 <%= render 'form', method: :patch, url: bridge_integration_path(@bridge_integration) %>
 
 <script>
@@ -31,3 +25,7 @@
         toggleCheckJiraConnectionButton();
     });
 </script>
+
+<% content_for :header_tags do %>
+  <%= stylesheet_link_tag 'redmine_bridge', plugin: 'redmine_bridge' %>
+<% end %>
