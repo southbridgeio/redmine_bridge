@@ -1,4 +1,4 @@
-class UpdatesToExternalIssues < ActiveRecord::Migration[5.2]
+class UpdatesToExternalIssues < Rails.version < '5.0' ? ActiveRecord::Migration : ActiveRecord::Migration[4.2]
   def change
     change_column_null :external_issues, :external_id, true
     change_column_null :external_issues, :external_url, true

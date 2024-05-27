@@ -1,4 +1,4 @@
-class CreateExternalIssues < ActiveRecord::Migration[5.2]
+class CreateExternalIssues < Rails.version < '5.0' ? ActiveRecord::Migration : ActiveRecord::Migration[4.2]
   def change
     create_table :external_issues do |t|
       t.belongs_to :redmine, foreign_key: { to_table: :issues }
