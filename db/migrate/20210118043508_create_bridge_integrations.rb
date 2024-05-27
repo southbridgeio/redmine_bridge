@@ -1,4 +1,4 @@
-class CreateBridgeIntegrations < ActiveRecord::Migration[5.2]
+class CreateBridgeIntegrations < Rails.version < '5.0' ? ActiveRecord::Migration : ActiveRecord::Migration[4.2]
   def change
     create_table :bridge_integrations do |t|
       t.string :name, null: false

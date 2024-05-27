@@ -4,13 +4,13 @@
 
 <% annotations.each do |key, value| %>
 <% value = value.sub("\n", "\n\n") if key == 'description' %>
-*<%= key %>*: <%= value.strip + "\n" %>
+**<%= key %>**: <%= value.strip + "\n" %>
 <% end %>
 
 
 <% if start_time %>
-*Start time:* <%= start_time.to_time.strftime('%Y.%m.%d %H:%M:%S') %>
+**Start time:** <%= start_time.to_time.strftime('%Y.%m.%d %H:%M:%S') %>
 <% if comment_block %>
-*Current time:* <%= Time.now.strftime('%Y.%m.%d %H:%M:%S') %>
+**Current time:** <%= Time.now.strftime('%Y.%m.%d %H:%M:%S') %>
 <% end %>
 <% end %>
