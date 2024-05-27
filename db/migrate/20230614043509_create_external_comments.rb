@@ -1,4 +1,4 @@
-class CreateExternalComments < ActiveRecord::Migration[5.2]
+class CreateExternalComments < Rails.version < '5.0' ? ActiveRecord::Migration : ActiveRecord::Migration[4.2]
   def change
     create_table :external_comments do |t|
       t.belongs_to :redmine, foreign_key: { to_table: :journals }

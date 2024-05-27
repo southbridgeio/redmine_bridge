@@ -1,4 +1,4 @@
-class AddUniqIndexToExternalIssues < ActiveRecord::Migration[5.2]
+class AddUniqIndexToExternalIssues < Rails.version < '5.0' ? ActiveRecord::Migration : ActiveRecord::Migration[4.2]
   def change
     remove_index :external_issues, :redmine_id
     add_index :external_issues, [:redmine_id, :connector_id], unique: true, where: 'redmine_id IS NOT NULL'
