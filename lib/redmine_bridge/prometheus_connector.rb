@@ -39,9 +39,9 @@ class RedmineBridge::PrometheusConnector
       if ExternalIssue.exists?(external_id: external_key, connector_id: 'prometheus')
         case alert['status']
         when 'resolved', 'Resolve'
-          issue_repository.add_notes(external_key, "*OK*\n#{format_payload(alert, comment_block: true)}")
+          issue_repository.add_notes(external_key, "**OK**\n#{format_payload(alert, comment_block: true)}")
         when 'firing', 'Problem'
-          issue_repository.add_notes(external_key, "*PROBLEM*\n#{format_payload(alert, comment_block: true)}")
+          issue_repository.add_notes(external_key, "**PROBLEM**\n#{format_payload(alert, comment_block: true)}")
         end
       elsif alert['status'] != 'resolved'
         external_attributes = RedmineBridge::ExternalAttributes.new(
