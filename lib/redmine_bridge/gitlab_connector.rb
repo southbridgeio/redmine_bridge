@@ -28,6 +28,8 @@ class RedmineBridge::GitlabConnector
   end
 
   def on_issue_update(journal:, external_issue:)
+    return logger.warn("Empty external_id in #{external_issue.inspect}") if external_issue.external_id.blank?
+
     issue_iid, project_id = external_issue.external_id.split('-')
 
     if journal.notes.present?
