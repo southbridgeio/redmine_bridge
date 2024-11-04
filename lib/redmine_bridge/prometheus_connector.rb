@@ -74,6 +74,12 @@ class RedmineBridge::PrometheusConnector
                                 author: User.anonymous)
       end
     end
+  rescue ActiveRecord::StaleObjectError => e
+    logger.warn("Error: #{e}. Too much requests from Prometheus, rescheduling with params: #{params}")
+
+    RedmineBridge::WebhookJob.set(wait: 3.seconds).perform_later(integration, params)
+  rescue ActiveRecord::RecordNotUnique => e
+    # do nothing
   end
 
   private
