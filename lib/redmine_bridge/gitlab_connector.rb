@@ -27,6 +27,10 @@ class RedmineBridge::GitlabConnector
     @integration = integration
   end
 
+  def valid_for?(params)
+    params.keys.include?('event_type')
+  end
+
   def on_issue_update(journal:, external_issue:)
     return logger.warn("Empty external_id in #{external_issue.inspect}") if external_issue.external_id.blank?
 
