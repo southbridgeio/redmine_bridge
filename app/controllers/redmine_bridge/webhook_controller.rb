@@ -23,11 +23,11 @@ class RedmineBridge::WebhookController < ActionController::API
     valid = RedmineBridge::Registry[integration.connector_id]
               .call(integration: integration)
               .valid_for?(params)
-    send_airbrake_notification(params) unless valid
+    send_airbrake_notification(integration.name, params) unless valid
     valid
   end
 
-  def send_airbrake_notification(params)
-    Airbrake.notify('Webhook wrong params', params: params) if defined?(Airbrake) && Rails.env.production?
+  def send_airbrake_notification(name, params)
+    Airbrake.notify("Webhook wrong params for [#{name}]", params: params) if defined?(Airbrake) && Rails.env.production?
   end
 end
