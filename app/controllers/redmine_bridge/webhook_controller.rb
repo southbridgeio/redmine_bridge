@@ -7,6 +7,7 @@ class RedmineBridge::WebhookController < ActionController::API
     integration = BridgeIntegration.find_by(key: key)
 
     return head :forbidden unless integration
+    return head :forbidden unless validate_params(integration, request.request_parameters)
 
     # wait 3 seconds - because we have race conditions, when we create jira issue,
     # got webhook about creation, but not yet save in database external_id with created
@@ -14,5 +15,19 @@ class RedmineBridge::WebhookController < ActionController::API
     RedmineBridge::WebhookJob.set(wait: 3.seconds).perform_later(integration, request.request_parameters)
 
     render json: {}
+  end
+
+  private
+
+  def validate_params(integration, params)
+    valid = RedmineBridge::Registry[integration.connector_id]
+              .call(integration: integration)
+              .valid_for?(params)
+    send_airbrake_notification(params) unless valid
+    valid
+  end
+
+  def send_airbrake_notification(params)
+    Airbrake.notify('Webhook wrong params', params: params) if defined?(Airbrake) && Rails.env.production?
   end
 end

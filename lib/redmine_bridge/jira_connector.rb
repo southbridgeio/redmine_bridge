@@ -4,6 +4,10 @@ class RedmineBridge::JiraConnector
     @integration = integration
   end
 
+  def valid_for?(params)
+    %w[issue_event_type_name webhookEvent].any? { |k| params.key?(k) }
+  end
+
   #######
   ### Redmine to Jira
   #######

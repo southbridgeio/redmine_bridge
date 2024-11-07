@@ -7,6 +7,10 @@ class RedmineBridge::PrometheusConnector
     @integration = integration
   end
 
+  def valid_for?(params)
+    params.keys.include?('alerts')
+  end
+
   def on_issue_update(*)
     # TODO
   end
