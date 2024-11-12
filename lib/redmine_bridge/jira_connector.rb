@@ -117,9 +117,9 @@ class RedmineBridge::JiraConnector
   def check_connection
     jira_client.ServerInfo.all
 
-    { result: true }
+    { success: true }
   rescue => e
-    { result: false, message: "#{e.class}: #{e.message}"}
+    { success: false, message: "#{e.class}: #{e.message}"}
   end
 
   private
