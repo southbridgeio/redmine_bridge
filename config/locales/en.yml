@@ -21,3 +21,17 @@ en:
       connection_success: Connection established
       connection_fail: Connection error
       connection_timeout: Connection timeout expired
+
+      mattermost:
+        api_url: Mattermost API URL
+        token_id: Token ID
+        access_token: Access Token
+        team_id: Mattermost team ID
+        tls_errors: Skip TLS errors
+        defaults: Default issue values
+        default_tracker_id: Tracker (id)
+        default_priority_id: Priority (id)
+        default_status_id: Status (id)
+        default_assignee_id: Assignee (id)
+        initial_message: Initial message
+        issue_created: Issue [#%{id}](%{url}) was created.
