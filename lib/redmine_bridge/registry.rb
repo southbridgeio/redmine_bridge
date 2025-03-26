@@ -6,4 +6,5 @@ module RedmineBridge::Registry
   register :jira, ->(*args) { RedmineBridge::JiraConnector.new(*args) }
   register :prometheus, ->(*args) { RedmineBridge::PrometheusConnector.new(*args) }
   register :gitlab, ->(*args) { RedmineBridge::GitlabConnector.new(*args) }
+  register :mattermost, ->(*args) { RedmineBridge::MattermostConnector.new(*args) }
 end

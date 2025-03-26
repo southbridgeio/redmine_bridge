@@ -21,3 +21,17 @@ ru:
       connection_success: Соединение установлено
       connection_fail: Соединение отсутствует
       connection_timeout: Истекло время ожидания соединения
+
+      mattermost:
+        api_url: Mattermost API URL
+        token_id: Token ID
+        access_token: Access Token
+        team_id: ID команды в Mattermost
+        tls_errors: Игнорировать ошибки TLS
+        defaults: Значения по умолчанию
+        default_tracker_id: Трекер (id)
+        default_priority_id: Приоритет (id)
+        default_status_id: Статус (id)
+        default_assignee_id: Исполнитель (id)
+        initial_message: Исходное сообщение
+        issue_created: Задача [#%{id}](%{url}) создана.
