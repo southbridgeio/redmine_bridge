@@ -1,4 +1,4 @@
-class RedmineBridge::PrometheusConnector
+class RedmineBridge::PrometheusConnector < RedmineBridge::Connector
   CLIENTS_HEXDIGEST_FIELDS = %w[alertname namespace resource resourcequota].freeze
   SOUTHBRIDGE_HEXDIGEST_FIELDS = %w[alertname namespace resource resourcequota redmine_project instance].freeze
 
