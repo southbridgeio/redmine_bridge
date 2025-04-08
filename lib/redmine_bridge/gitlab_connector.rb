@@ -1,4 +1,4 @@
-class RedmineBridge::GitlabConnector
+class RedmineBridge::GitlabConnector < RedmineBridge::Connector
   module IntegrationRefinements
     refine BridgeIntegration do
       def gitlab_client

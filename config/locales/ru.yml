@@ -23,7 +23,8 @@ ru:
       connection_timeout: Истекло время ожидания соединения
 
       mattermost:
-        api_url: Mattermost API URL
+        api_url: Mattermost URL
+        api_url_example: "Пример: mm.domain.com"
         token_id: Token ID
         access_token: Access Token
         team_id: ID команды в Mattermost

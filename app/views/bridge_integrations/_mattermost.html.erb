@@ -21,6 +21,7 @@
 <p>
   <%= form.label 'settings[mattermost_api_url]', t('redmine_bridge.integration.mattermost.api_url') %>
   <%= form.text_field 'settings[mattermost_api_url]', value: @bridge_integration.settings['mattermost_api_url'] %>
+  <em class="info"><%= t('redmine_bridge.integration.mattermost.api_url_example') %></em>
 </p>
 
 <p>
@@ -36,10 +37,4 @@
 <p>
   <%= form.label 'settings[mattermost_team_id]', t('redmine_bridge.integration.mattermost.team_id')  %>
   <%= form.text_field 'settings[mattermost_team_id]', value: @bridge_integration.settings['mattermost_team_id'] %>
-</p>
-
-
-<p>
-  <%= form.label 'settings[mattermost_tls_errors]', t('redmine_bridge.integration.mattermost.tls_errors') %>
-  <%= form.check_box 'settings[mattermost_tls_errors]', checked: @bridge_integration.settings['mattermost_tls_errors'] == '1' %>
 </p>

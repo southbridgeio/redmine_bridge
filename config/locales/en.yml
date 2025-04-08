@@ -23,7 +23,8 @@ en:
       connection_timeout: Connection timeout expired
 
       mattermost:
-        api_url: Mattermost API URL
+        api_url: Mattermost URL
+        api_url_example: "e.g.: mm.domain.com"
         token_id: Token ID
         access_token: Access Token
         team_id: Mattermost team ID

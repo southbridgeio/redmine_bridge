@@ -8,7 +8,7 @@ module RedmineBridge
     end
 
     def issue_created(issue)
-      RestClient.post(File.join(base_url, 'posts'), payload(issue).to_json, headers)
+      RestClient.post(File.join("#{Setting.protocol}://", base_url, 'posts'), payload(issue).to_json, headers)
     end
 
     private

@@ -1,4 +1,4 @@
-class RedmineBridge::JiraConnector
+class RedmineBridge::JiraConnector < RedmineBridge::Connector
   def initialize(logger: Rails.logger, integration:)
     @logger = logger
     @integration = integration
