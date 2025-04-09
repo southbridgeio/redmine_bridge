@@ -1,4 +1,4 @@
-class RedmineBridge::PrometheusConnector < RedmineBridge::Connector
+class RedmineBridge::PrometheusConnector
   CLIENTS_HEXDIGEST_FIELDS = %w[alertname namespace resource resourcequota].freeze
   SOUTHBRIDGE_HEXDIGEST_FIELDS = %w[alertname namespace resource resourcequota redmine_project instance].freeze
 
@@ -9,6 +9,9 @@ class RedmineBridge::PrometheusConnector < RedmineBridge::Connector
 
   def valid_for?(params)
     params.keys.include?('alerts')
+  end
+
+  def runner
   end
 
   def on_issue_update(*)

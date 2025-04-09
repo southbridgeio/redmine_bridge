@@ -1,4 +1,4 @@
-class RedmineBridge::JiraConnector < RedmineBridge::Connector
+class RedmineBridge::JiraConnector
   def initialize(logger: Rails.logger, integration:)
     @logger = logger
     @integration = integration
@@ -6,6 +6,9 @@ class RedmineBridge::JiraConnector < RedmineBridge::Connector
 
   def valid_for?(params)
     %w[issue_event_type_name webhookEvent].any? { |k| params.key?(k) }
+  end
+
+  def runner
   end
 
   #######
