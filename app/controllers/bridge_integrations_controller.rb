@@ -2,6 +2,8 @@
 
 # Configure integrations
 class BridgeIntegrationsController < ApplicationController
+  after_action :restart_runners, only: [:create, :update, :destroy]
+
   layout 'admin'
 
   def create
@@ -72,5 +74,9 @@ class BridgeIntegrationsController < ApplicationController
       :southbridge_integration,
       settings: {}
     )
+  end
+
+  def restart_runners
+    RedmineBridge::Runner.instance.restart_runners
   end
 end

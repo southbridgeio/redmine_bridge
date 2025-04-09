@@ -1,4 +1,4 @@
-class RedmineBridge::MattermostConnector < RedmineBridge::Connector
+class RedmineBridge::MattermostConnector
   RECONNECT_TIME = 5
 
   def initialize(logger: Rails.logger, integration:)
@@ -11,56 +11,8 @@ class RedmineBridge::MattermostConnector < RedmineBridge::Connector
     (%w[team_id channel_id post_id text] - params.keys).empty?
   end
 
-  def run_service
-    Thread.new do
-      loop do
-        Rails.logger.error [:em_run, integration.name]
-        EM.run do
-          url = "#{Setting.protocol == 'https' ? 'wss' : 'ws'}://#{settings['mattermost_api_url']}/api/v4/websocket"
-          ws = Faye::WebSocket::Client.new(url, [], headers: { 'Origin' => Setting.host_name })
-
-          ws.onopen = lambda do |event|
-            Rails.logger.info [:ws_open, ws.headers]
-            ws.send(
-              {
-                seq: 1,
-                action: 'authentication_challenge',
-                data: {
-                  token: settings['mattermost_access_token']
-                }
-              }.to_json
-            )
-          end
-
-          ws.onclose = lambda do |close|
-            Rails.logger.info [:ws_close, close.code, close.reason]
-            EM.stop
-          end
-
-          ws.onerror = lambda do |error|
-            Rails.logger.error [:ws_error, error.message]
-          end
-
-          ws.onmessage = lambda do |message|
-            Rails.logger.info [:ws_message, message.data]
-
-            data = JSON.parse(message.data)['data']
-            post = JSON.parse(data['post']) if data && data['post']
-            return unless post
-
-            params = {
-              'channel_id' => post['channel_id'],
-              'post_id' => post['id'],
-              'user_id' => post['user_id'],
-              'text' => post['message']
-            }
-            RedmineBridge::WebhookJob.set(wait: 3.seconds).perform_later(integration, params)
-          end
-        end
-        Rails.logger.error [:em_stop, integration.name]
-        sleep RECONNECT_TIME
-      end
-    end
+  def runner
+    RedmineBridge::Runners::Mattermost
   end
 
   def on_issue_update(*)

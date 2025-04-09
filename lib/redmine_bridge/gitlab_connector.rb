@@ -1,4 +1,4 @@
-class RedmineBridge::GitlabConnector < RedmineBridge::Connector
+class RedmineBridge::GitlabConnector
   module IntegrationRefinements
     refine BridgeIntegration do
       def gitlab_client
@@ -29,6 +29,9 @@ class RedmineBridge::GitlabConnector < RedmineBridge::Connector
 
   def valid_for?(params)
     params.keys.include?('event_type')
+  end
+
+  def runner
   end
 
   def on_issue_update(journal:, external_issue:)
