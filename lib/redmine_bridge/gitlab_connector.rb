@@ -87,7 +87,7 @@ class RedmineBridge::GitlabConnector
     # TODO
   end
 
-  def on_webhook_event(params:, issue_repository:)
+  def on_webhook_event(params:, issue_repository:, test:)
     # TODO
     return if params.dig('user', 'email')&.include?('@example.com')
 
