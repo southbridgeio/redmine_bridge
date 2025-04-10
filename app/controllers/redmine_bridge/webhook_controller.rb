@@ -42,7 +42,7 @@ class RedmineBridge::WebhookController < ActionController::API
   def verify_integration
     self.key = params[:key] || request.headers['X-Gitlab-Token'] || request.headers['Authorization']&.gsub(/^Bearer /, '')
 
-    head :forbidden if !integration && !validate_params(integration, request.request_parameters)
+    head :forbidden if !integration || !validate_params(integration, request.request_parameters)
   end
 
   def integration
