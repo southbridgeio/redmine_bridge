@@ -65,7 +65,7 @@ class RedmineBridge::JiraConnector
   #######
 
   # TODO: ExtenrnalIssue should be synced
-  def on_webhook_event(params:, issue_repository:)
+  def on_webhook_event(params:, issue_repository:, test:)
     project = integration.project
 
     processed =

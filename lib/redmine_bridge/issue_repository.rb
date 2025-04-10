@@ -3,7 +3,7 @@ class RedmineBridge::IssueRepository
     @integration = integration
   end
 
-  def create(external_attributes, **params)
+  def create(external_attributes, test, **params)
     status_id = integration.statuses.reject { |_k, v| v.blank? }.invert[external_attributes.status_id.to_s]
     priority_id = integration.priorities.reject { |_k, v| v.blank? }.invert[external_attributes.priority_id.to_s]
 
@@ -14,15 +14,26 @@ class RedmineBridge::IssueRepository
 
     issue =
       ActiveRecord::Base.transaction do
-        issue = Issue.create!(params.merge(status_id: status_id, priority_id: priority_id).compact)
-        ExternalIssue.create!(redmine_id: issue.id,
-                              connector_id: connector_id,
-                              external_id: external_attributes.id,
-                              bridge_integration: integration,
-                              external_url: external_attributes.url)
+        issue = Issue.new(params.merge(status_id: status_id, priority_id: priority_id).compact)
+        issue.save! unless test
+
+        new_external_issue = ExternalIssue.new(redmine_id: issue.id,
+                                               connector_id: connector_id,
+                                               external_id: external_attributes.id,
+                                               bridge_integration: integration,
+                                               external_url: external_attributes.url)
+        new_external_issue.save! unless test
+
         issue
       end
-    broadcast_issue_created(issue)
+
+    if connector_id == 'jira'
+      broadcast_issue_created(issue)
+    else
+      broadcast_issue_created(issue)
+
+      issue
+    end
   end
 
   def update(external_attributes, **params)
@@ -52,14 +63,20 @@ class RedmineBridge::IssueRepository
   end
 
   # Is keeped to compatibility with prometheus
-  def add_notes(external_id, notes)
+  def add_notes(external_id, notes, test: false)
     issue = ExternalIssue.find_by(external_id: external_id, connector_id: connector_id)&.redmine_issue
     return unless issue
 
     journal = issue.init_journal(User.anonymous, notes)
-    issue.save!
+    issue.save! unless test
 
-    broadcast_issue_updated(issue, journal)
+    if connector_id == 'jira'
+      broadcast_issue_updated(issue, journal)
+    else
+      broadcast_issue_updated(issue, journal)
+
+      issue
+    end
   end
 
   def add_or_update_comment(issue_id, comment_id, notes)
@@ -96,6 +113,8 @@ class RedmineBridge::IssueRepository
   attr_reader :integration
 
   def broadcast_issue_created(issue)
+    return if issue.id.blank?
+
     bridge_integrations = BridgeIntegration.where(project_id: integration.project_id)
     # делаем broadcast только в jira, т.к. gitlab ждет апдейтов только у своих ишьюсов
     bridge_integrations

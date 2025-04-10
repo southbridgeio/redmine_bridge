@@ -34,10 +34,10 @@ class RedmineBridge::PrometheusConnector
     raise NotImplementedError
   end
 
-  def on_webhook_event(params:, issue_repository:)
+  def on_webhook_event(params:, issue_repository:, test:)
     common_labels = params['commonLabels'] || {}
 
-    Array.wrap(params['alerts']).each do |alert|
+    Array.wrap(params['alerts']).map do |alert|
       project = find_project(integration, alert)
       alert = alert.merge(params.slice('externalURL'))
       # TODO: это надо проверить, что нет пересечений(что какие-то уникальные параметры
@@ -46,7 +46,7 @@ class RedmineBridge::PrometheusConnector
       external_key = find_external_key(alert, integration)
 
       external_issue = ExternalIssue.find_by(external_id: external_key)
-      external_issue.destroy! if external_issue&.redmine_issue&.closed?
+      external_issue.destroy! if external_issue&.redmine_issue&.closed? && !test
 
       alert_name = alert.dig('labels', 'alertname')
       alert_status = if alert_name == 'Watchdog'
@@ -58,9 +58,9 @@ class RedmineBridge::PrometheusConnector
       if ExternalIssue.exists?(external_id: external_key, connector_id: 'prometheus')
         case alert_status
         when 'resolved', 'Resolve'
-          issue_repository.add_notes(external_key, "**OK**\n#{format_payload(alert, comment_block: true)}")
+          issue_repository.add_notes(external_key, "**OK**\n#{format_payload(alert, comment_block: true)}", test: test)
         when 'firing', 'Problem'
-          issue_repository.add_notes(external_key, "**PROBLEM**\n#{format_payload(alert, comment_block: true)}")
+          issue_repository.add_notes(external_key, "**PROBLEM**\n#{format_payload(alert, comment_block: true)}", test: test)
         end
       elsif alert_status != 'resolved'
         external_attributes = RedmineBridge::ExternalAttributes.new(
@@ -74,6 +74,7 @@ class RedmineBridge::PrometheusConnector
         subject = [stage, alert_title].compact.join(' ').truncate(255)
 
         issue_repository.create(external_attributes,
+                                test,
                                 project_id: project.id,
                                 subject: subject,
                                 description: format_payload(alert),

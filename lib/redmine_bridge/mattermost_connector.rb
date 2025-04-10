@@ -35,7 +35,7 @@ class RedmineBridge::MattermostConnector
     raise NotImplementedError
   end
 
-  def on_webhook_event(params:, issue_repository:)
+  def on_webhook_event(params:, issue_repository:, test:)
     project = integration.project
     tracker = project.trackers.find_by(id: settings['mattermost_default_tracker_id']) || project.trackers.first
     status_id = settings['mattermost_default_status_id'] || tracker.issue_statuses.first.id
