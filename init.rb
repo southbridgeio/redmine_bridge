@@ -13,7 +13,7 @@ end
 Rails.application.config.eager_load_paths += Dir.glob("#{Rails.application.config.root}/plugins/redmine_bridge/{lib,app/models,app/controllers}")
 
 Rails.application.config.after_initialize do
-  RedmineBridge::Runner.instance.start_runners
+  RedmineBridge::Runner.instance.restart_runners
 end
 
 Redmine::Plugin.register :redmine_bridge do

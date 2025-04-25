@@ -1,7 +1,7 @@
 class RedmineBridge::MattermostConnector
   RECONNECT_TIME = 5
 
-  def initialize(logger: Rails.logger, integration:)
+  def initialize(integration:, logger: Rails.logger)
     @logger = logger
     @integration = integration
     @settings = integration.settings
@@ -46,15 +46,23 @@ class RedmineBridge::MattermostConnector
 
     case command.downcase
     when 'задача', 'задача:', 'issue', 'issue:'
-      issue = Issue.create!(project: project,
-                            tracker: tracker,
-                            status_id: status_id,
-                            priority_id: priority_id,
-                            subject: data,
-                            description: build_description(params['post_id'], extra),
-                            author: User.anonymous)
+      ApplicationRecord.transaction do
+        raise ActiveRecord::Rollback if integration.external_issues.find_by(external_id: params['post_id'])
 
-      ::RedmineBridge::MattermostClient.new(settings, params).issue_created(issue)
+        issue = Issue.create!(project: project,
+                              tracker: tracker,
+                              status_id: status_id,
+                              priority_id: priority_id,
+                              subject: data,
+                              description: build_description(params['post_id'], extra),
+                              author: User.anonymous)
+
+        integration.external_issues.create!(external_id: params['post_id'],
+                                            redmine_issue: issue,
+                                            state: :skipped,
+                                            connector_id: integration.connector_id)
+        ::RedmineBridge::MattermostClient.new(settings, params).issue_created(issue)
+      end
     end
   end
 
