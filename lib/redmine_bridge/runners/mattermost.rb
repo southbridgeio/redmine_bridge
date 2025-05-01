@@ -49,6 +49,7 @@ class RedmineBridge::Runners::Mattermost
             params = {
               'channel_id' => post['channel_id'],
               'post_id' => post['id'],
+              'root_id' => post['root_id'],
               'user_id' => post['user_id'],
               'text' => post['message']
             }

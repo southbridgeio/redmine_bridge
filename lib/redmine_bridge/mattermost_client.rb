@@ -20,7 +20,7 @@ module RedmineBridge
       {
         channel_id: params['channel_id'],
         message: I18n.t('redmine_bridge.integration.mattermost.issue_created', id: issue.id, url: issue_url),
-        root_id: params['post_id'],
+        root_id: params['root_id'].presence || params['post_id'],
       }
     end
 
