@@ -36,3 +36,4 @@ en:
         default_assignee_id: Assignee (id)
         initial_message: Initial message
         issue_created: Issue [#%{id}](%{url}) was created.
+        unknown_action: Unknown command, please check syntax

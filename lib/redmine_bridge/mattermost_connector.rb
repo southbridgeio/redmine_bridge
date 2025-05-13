@@ -69,6 +69,8 @@ class RedmineBridge::MattermostConnector
 
         ::RedmineBridge::MattermostClient.new(settings, params).issue_created(issue)
       end
+    else
+      ::RedmineBridge::MattermostClient.new(settings, params).unknown_action
     end
   end
 
