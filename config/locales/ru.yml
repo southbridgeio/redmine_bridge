@@ -36,3 +36,4 @@ ru:
         default_assignee_id: Исполнитель (id)
         initial_message: Исходное сообщение
         issue_created: Задача [#%{id}](%{url}) создана.
+        unknown_action: Команда не распознана, проверьте синтаксис
