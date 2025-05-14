@@ -25,6 +25,7 @@ en:
       mattermost:
         api_url: Mattermost URL
         api_url_example: "e.g.: mm.domain.com"
+        username: Bot username
         token_id: Token ID
         access_token: Access Token
         team_id: Mattermost team ID

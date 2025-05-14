@@ -44,14 +44,14 @@ class RedmineBridge::Runners::Mattermost
 
             data = JSON.parse(message.data)['data']
             post = JSON.parse(data['post']) if data && data['post']
-            return unless post
+            return if !post || post['message'].exclude?("@#{settings['mattermost_token_username']}")
 
             params = {
               'channel_id' => post['channel_id'],
               'post_id' => post['id'],
               'root_id' => post['root_id'],
               'user_id' => post['user_id'],
-              'text' => post['message']
+              'text' => post['message'].strip
             }
             RedmineBridge::WebhookJob.set(wait: 3.seconds).perform_later(integration, params)
           end

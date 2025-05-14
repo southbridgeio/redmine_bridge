@@ -25,6 +25,7 @@ ru:
       mattermost:
         api_url: Mattermost URL
         api_url_example: "Пример: mm.domain.com"
+        username: Username бота
         token_id: Token ID
         access_token: Access Token
         team_id: ID команды в Mattermost

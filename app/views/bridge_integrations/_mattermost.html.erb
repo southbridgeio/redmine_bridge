@@ -25,6 +25,11 @@
 </p>
 
 <p>
+  <%= form.label 'settings[mattermost_token_username]', t('redmine_bridge.integration.mattermost.username') %>
+  <%= form.text_field 'settings[mattermost_token_username]', value: @bridge_integration.settings['mattermost_token_username'] %>
+</p>
+
+<p>
   <%= form.label 'settings[mattermost_token_id]', t('redmine_bridge.integration.mattermost.token_id') %>
   <%= form.text_field 'settings[mattermost_token_id]', value: @bridge_integration.settings['mattermost_token_id'] %>
 </p>
