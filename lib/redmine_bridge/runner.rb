@@ -1,7 +1,7 @@
 class RedmineBridge::Runner
   include Singleton
 
-  def initialize(logger: Rails.logger)
+  def initialize(logger: ActiveSupport::Logger.new("log/runner_#{Rails.env}.log"))
     @logger = logger
     @runner_threads = {}
   end

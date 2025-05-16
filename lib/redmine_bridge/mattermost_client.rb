@@ -9,10 +9,14 @@ module RedmineBridge
 
     def issue_created(issue)
       RestClient.post(File.join("#{Setting.protocol}://", base_url, 'posts'), payload(issue).to_json, headers)
+    rescue RestClient::InternalServerError
+      Rails.logger.error("RedmineBridge::MattermostClient#issue_created RestClient error: #{payload(issue)}")
     end
 
     def unknown_action
       RestClient.post(File.join("#{Setting.protocol}://", base_url, 'posts'), unknown_payload.to_json, headers)
+    rescue RestClient::InternalServerError
+      Rails.logger.error("RedmineBridge::MattermostClient#unknown_action RestClient error: #{unknown_payload}")
     end
 
     private
