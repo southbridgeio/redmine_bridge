@@ -46,6 +46,8 @@ class RedmineBridge::Runners::Mattermost
             post = JSON.parse(data['post']) if data && data['post']
             return if !post || post['message'].exclude?("@#{settings['mattermost_token_username']}")
 
+            # TODO: Disable debug after problem solve
+            logger.error [:post, post]
             params = {
               'channel_id' => post['channel_id'],
               'post_id' => post['id'],
