@@ -16,7 +16,7 @@ module RedmineBridge
     def issue_updated(issue)
       RestClient.post(File.join("#{Setting.protocol}://", base_url, 'posts'), updated_payload(issue).to_json, headers)
     rescue RestClient::InternalServerError
-      Rails.logger.error("RedmineBridge::MattermostClient#issue_updated RestClient error: #{payload(issue)}")
+      Rails.logger.error("RedmineBridge::MattermostClient#issue_updated RestClient error: #{updated_payload(issue)}")
     end
 
     def unknown_action
