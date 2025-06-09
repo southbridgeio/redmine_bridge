@@ -43,3 +43,8 @@
   <%= form.label 'settings[mattermost_team_id]', t('redmine_bridge.integration.mattermost.team_id')  %>
   <%= form.text_field 'settings[mattermost_team_id]', value: @bridge_integration.settings['mattermost_team_id'] %>
 </p>
+
+<p>
+  <%= form.label 'settings[mattermost_locale]', t('redmine_bridge.integration.mattermost.messages_locale')  %>
+  <%= select_tag 'bridge_integration[settings[mattermost_locale]]', options_for_select(lang_options_for_select(false), @bridge_integration.settings['mattermost_locale'].to_s) %>
+</p>

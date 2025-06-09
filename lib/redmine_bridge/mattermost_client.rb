@@ -13,6 +13,12 @@ module RedmineBridge
       Rails.logger.error("RedmineBridge::MattermostClient#issue_created RestClient error: #{payload(issue)}")
     end
 
+    def issue_updated(issue)
+      RestClient.post(File.join("#{Setting.protocol}://", base_url, 'posts'), updated_payload(issue).to_json, headers)
+    rescue RestClient::InternalServerError
+      Rails.logger.error("RedmineBridge::MattermostClient#issue_updated RestClient error: #{payload(issue)}")
+    end
+
     def unknown_action
       RestClient.post(File.join("#{Setting.protocol}://", base_url, 'posts'), unknown_payload.to_json, headers)
     rescue RestClient::InternalServerError
@@ -28,6 +34,14 @@ module RedmineBridge
       {
         channel_id: params['channel_id'],
         message: I18n.t('redmine_bridge.integration.mattermost.issue_created', id: issue.id, url: issue_url),
+        root_id: params['root_id'].presence || params['post_id'],
+      }
+    end
+
+    def updated_payload(issue)
+      {
+        channel_id: params['channel_id'],
+        message: issue.as_markdown,
         root_id: params['root_id'].presence || params['post_id'],
       }
     end
