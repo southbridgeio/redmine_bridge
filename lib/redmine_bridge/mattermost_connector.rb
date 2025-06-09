@@ -17,8 +17,13 @@ class RedmineBridge::MattermostConnector
     RedmineBridge::Runners::Mattermost
   end
 
-  def on_issue_update(*)
-    # TODO
+  def on_issue_update(journal:, external_issue:)
+    params = {
+      'channel_id' => external_issue.external_url,
+      'root_id' => external_issue.external_id.split('|').find(&:present?),
+    }
+    issue = Intouch::IssueDecorator.new(external_issue.redmine_issue, journal.id, protocol: 'mattermost')
+    ::RedmineBridge::MattermostClient.new(settings, params).issue_updated(issue)
   end
 
   def on_issue_create(*)
@@ -47,7 +52,8 @@ class RedmineBridge::MattermostConnector
     return unless command
 
     issue_attributes = {
-      post_id: params['post_id'],
+      post_id: "#{params['root_id']}|#{params['post_id']}",
+      channel_id: params['channel_id'],
       project: project,
       tracker: tracker,
       status_id: status_id,
@@ -104,6 +110,7 @@ class RedmineBridge::MattermostConnector
                           author: User.anonymous)
 
     integration.external_issues.create!(external_id: attrs[:post_id],
+                                        external_url: attrs[:channel_id],
                                         redmine_issue: issue,
                                         state: :skipped,
                                         connector_id: integration.connector_id)
