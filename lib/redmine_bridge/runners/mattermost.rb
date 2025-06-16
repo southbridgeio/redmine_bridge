@@ -45,7 +45,7 @@ class RedmineBridge::Runners::Mattermost
 
             data = JSON.parse(message.data)['data']
             post = JSON.parse(data['post']) if data && data['post']
-            return if !post || post['message'].exclude?("@#{settings['mattermost_token_username']}")
+            return if post.nil? || !post['message'].start_with?("@#{settings['mattermost_token_username']}")
 
             # TODO: Disable debug after problem solve
             logger.error [:post, post]
