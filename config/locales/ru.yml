@@ -29,6 +29,7 @@ ru:
         token_id: Token ID
         access_token: Access Token
         team_id: ID команды в Mattermost
+        author_id: Автор для задач
         tls_errors: Игнорировать ошибки TLS
         defaults: Значения по умолчанию
         default_tracker_id: Трекер (id)

@@ -106,8 +106,8 @@ class RedmineBridge::MattermostConnector
                           status_id: attrs[:status_id],
                           priority_id: attrs[:priority_id],
                           subject: attrs[:data],
-                          description: attrs[:description], #,
-                          author: User.anonymous)
+                          description: attrs[:description],
+                          author_id: settings['mattermost_author_id'])
 
     integration.external_issues.create!(external_id: attrs[:post_id],
                                         external_url: attrs[:channel_id],

@@ -45,6 +45,12 @@
 </p>
 
 <p>
+  <%= form.label 'settings[mattermost_author_id]', t('redmine_bridge.integration.mattermost.author_id')  %>
+  <%= select_tag 'bridge_integration[settings[mattermost_author_id]]',
+        options_for_select(User.order(%w(lastname firstname id)).visible.map{|u| [u.name, u.id]}, @bridge_integration.settings['mattermost_author_id'].to_s) %>
+</p>
+
+<p>
   <%= form.label 'settings[mattermost_locale]', t('redmine_bridge.integration.mattermost.messages_locale')  %>
   <%= select_tag 'bridge_integration[settings[mattermost_locale]]', options_for_select(lang_options_for_select(false), @bridge_integration.settings['mattermost_locale'].to_s) %>
 </p>
