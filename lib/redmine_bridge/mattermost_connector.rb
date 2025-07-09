@@ -76,7 +76,13 @@ class RedmineBridge::MattermostConnector
         ::RedmineBridge::MattermostClient.new(settings, params).issue_created(issue)
       end
     else
-      ::RedmineBridge::MattermostClient.new(settings, params).unknown_action
+      issue_attributes[:data] = "#{command} #{issue_attributes[:data]}"
+
+      ApplicationRecord.transaction do
+        issue = create_issue(issue_attributes)
+
+        ::RedmineBridge::MattermostClient.new(settings, params).issue_created(issue)
+      end
     end
   end
 
