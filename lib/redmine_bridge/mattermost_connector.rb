@@ -18,6 +18,8 @@ class RedmineBridge::MattermostConnector
   end
 
   def on_issue_update(journal:, external_issue:)
+    return unless external_issue.external_id
+
     params = {
       'channel_id' => external_issue.external_url,
       'root_id' => external_issue.external_id.split('|').find(&:present?),
