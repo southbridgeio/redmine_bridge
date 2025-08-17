@@ -49,12 +49,14 @@ class RedmineBridge::MattermostConnector
     tracker = project.trackers.find_by(id: settings['mattermost_default_tracker_id']) || project.trackers.first
     status_id = settings['mattermost_default_status_id'] || tracker.issue_statuses.first.id
     priority_id = settings['mattermost_default_priority_id'] || IssuePriority.active.default.id
+    full_post_id = "#{params['root_id']}|#{params['post_id']}"
 
     command, data, extra = parse_command(params)
     return unless command
+    return if ExternalIssue.where(external_id: full_post_id, bridge_integration_id: integration.id).exists?
 
     issue_attributes = {
-      post_id: "#{params['root_id']}|#{params['post_id']}",
+      post_id: full_post_id,
       channel_id: params['channel_id'],
       project: project,
       tracker: tracker,
@@ -107,8 +109,6 @@ class RedmineBridge::MattermostConnector
   end
 
   def create_issue(**attrs)
-    raise ActiveRecord::Rollback if integration.external_issues.find_by(external_id: attrs[:post_id])
-
     issue = Issue.create!(project: attrs[:project],
                           tracker: attrs[:tracker],
                           status_id: attrs[:status_id],
