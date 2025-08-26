@@ -53,40 +53,45 @@ class RedmineBridge::MattermostConnector
 
     command, data, extra = parse_command(params)
     return unless command
-    return if ExternalIssue.where(external_id: full_post_id, bridge_integration_id: integration.id).exists?
 
-    issue_attributes = {
-      post_id: full_post_id,
-      channel_id: params['channel_id'],
-      project: project,
-      tracker: tracker,
-      status_id: status_id,
-      priority_id: priority_id,
-      data: data,
-      description: build_description(params['post_id'], extra)
-    }
+    Rails.cache.fetch(full_post_id, expires_in: 5.seconds) do
+      Rails.cache.write(full_post_id, true)
+      return if ExternalIssue.where(external_id: full_post_id, bridge_integration_id: integration.id).exists?
 
-    case command.downcase
-    when 'задача', 'задача:', 'issue', 'issue:'
-      ApplicationRecord.transaction do
-        issue = create_issue(issue_attributes)
+      issue_attributes = {
+        post_id: full_post_id,
+        channel_id: params['channel_id'],
+        project: project,
+        tracker: tracker,
+        status_id: status_id,
+        priority_id: priority_id,
+        data: data,
+        description: build_description(params['post_id'], extra)
+      }
 
-        ::RedmineBridge::MattermostClient.new(settings, params).issue_created(issue)
+      case command.downcase
+      when 'задача', 'задача:', 'issue', 'issue:'
+        ApplicationRecord.transaction do
+          issue = create_issue(issue_attributes)
+
+          ::RedmineBridge::MattermostClient.new(settings, params).issue_created(issue)
+        end
+      when 'авария', 'авария:'
+        ApplicationRecord.transaction do
+          issue = create_issue(issue_attributes.merge(priority_id: ACCIDENT_PRIORITY))
+
+          ::RedmineBridge::MattermostClient.new(settings, params).issue_created(issue)
+        end
+      else
+        issue_attributes[:data] = "#{command} #{issue_attributes[:data]}"
+
+        ApplicationRecord.transaction do
+          issue = create_issue(issue_attributes)
+
+          ::RedmineBridge::MattermostClient.new(settings, params).issue_created(issue)
+        end
       end
-    when 'авария', 'авария:'
-      ApplicationRecord.transaction do
-        issue = create_issue(issue_attributes.merge(priority_id: ACCIDENT_PRIORITY))
-
-        ::RedmineBridge::MattermostClient.new(settings, params).issue_created(issue)
-      end
-    else
-      issue_attributes[:data] = "#{command} #{issue_attributes[:data]}"
-
-      ApplicationRecord.transaction do
-        issue = create_issue(issue_attributes)
-
-        ::RedmineBridge::MattermostClient.new(settings, params).issue_created(issue)
-      end
+      true
     end
   end
 
