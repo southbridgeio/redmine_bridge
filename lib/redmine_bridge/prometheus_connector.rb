@@ -2,6 +2,15 @@ class RedmineBridge::PrometheusConnector
   CLIENTS_HEXDIGEST_FIELDS = %w[alertname namespace resource resourcequota].freeze
   SOUTHBRIDGE_HEXDIGEST_FIELDS = %w[alertname namespace resource resourcequota redmine_project instance].freeze
 
+  STATUS_OK = 'OK'.freeze
+  STATUS_PROBLEM = 'PROBLEM'.freeze
+  ALERT_STATUS_VALUES = {
+    'resolved' => STATUS_OK,
+    'Resolve' => STATUS_OK,
+    'firing' => STATUS_PROBLEM,
+    'Problem' => STATUS_PROBLEM
+  }.freeze
+
   def initialize(logger: Rails.logger, integration:)
     @logger = logger
     @integration = integration
@@ -35,49 +44,29 @@ class RedmineBridge::PrometheusConnector
   end
 
   def on_webhook_event(params:, issue_repository:, test:)
-    common_labels = params['commonLabels'] || {}
-
-    Array.wrap(params['alerts']).map do |alert|
-      project = find_project(integration, alert)
-      alert = alert.merge(params.slice('externalURL'))
-      # TODO: это надо проверить, что нет пересечений(что какие-то уникальные параметры
-      # есть, время там или т.п.)
-
-      external_key = find_external_key(alert, integration)
+    grouped_alerts(params).each do |key_hash, objects|
+      external_key = key_hash[:key]
+      subject = key_hash[:subject]
+      project_id = key_hash[:project_id]
+      text = summary_text(objects)
 
       external_issue = ExternalIssue.find_by(external_id: external_key)
       external_issue.destroy! if external_issue&.redmine_issue&.closed? && !test
 
-      alert_name = alert.dig('labels', 'alertname')
-      alert_status = if alert_name == 'Watchdog'
-                       alert['status'] == 'resolved' ? 'firing' : 'resolved'
-                     else
-                       alert['status']
-                     end
-
       if ExternalIssue.exists?(external_id: external_key, connector_id: 'prometheus')
-        case alert_status
-        when 'resolved', 'Resolve'
-          issue_repository.add_notes(external_key, "**OK**\n#{format_payload(alert, comment_block: true)}", test: test)
-        when 'firing', 'Problem'
-          issue_repository.add_notes(external_key, "**PROBLEM**\n#{format_payload(alert, comment_block: true)}", test: test)
-        end
-      elsif alert_status != 'resolved'
+        issue_repository.add_notes(external_key, text, test: test)
+      elsif objects[STATUS_PROBLEM].any?
         external_attributes = RedmineBridge::ExternalAttributes.new(
           id: external_key,
           url: '',
-          priority_id: alert.dig('labels', 'severity')
+          priority_id: objects[STATUS_PROBLEM].map{ |alert| alert.dig('labels', 'severity') }.uniq.first # TODO: Perpahs more logic needs here
         )
-
-        alert_title = alert.dig('annotations', 'summary').presence || alert.dig('labels', 'alertname')
-        stage = common_labels['cluster'].present? ? "#{common_labels['cluster']}:" : nil
-        subject = [stage, alert_title].compact.join(' ').truncate(255)
 
         issue_repository.create(external_attributes,
                                 test,
-                                project_id: project.id,
+                                project_id: project_id,
                                 subject: subject,
-                                description: format_payload(alert),
+                                description: text,
                                 tracker: Tracker.first,
                                 author: User.anonymous)
       end
@@ -93,6 +82,42 @@ class RedmineBridge::PrometheusConnector
   private
 
   attr_reader :logger, :integration
+
+  def grouped_alerts(params)
+    Array.wrap(params['alerts']).each_with_object({}) do |alert, data|
+      alert = alert.merge(params.slice('externalURL'))
+
+      project = find_project(integration, alert)
+      status = alert_status(alert)
+      external_key = find_external_key(alert, integration)
+      subject = alert_subject(alert, params['commonLabels'])
+      key = { key: external_key, subject: subject, project_id: project&.id }
+
+      data[key] ||= Hash.new { |h, k| h[k] = [] }
+      data[key][status] << alert
+    end
+  end
+
+  def alert_status(alert)
+    alert_value = if alert.dig('labels', 'alertname') == 'Watchdog'
+                    alert['status'] == 'resolved' ? 'firing' : 'resolved'
+                  else
+                    alert['status']
+                  end
+    ALERT_STATUS_VALUES[alert_value]
+  end
+
+  def alert_subject(alert, c_labels = {})
+    alert_title = alert.dig('annotations', 'summary').presence || alert.dig('labels', 'alertname')
+    stage = c_labels['cluster'].present? ? "#{c_labels['cluster']}:" : nil
+    [stage, alert_title].compact.join(' ').truncate(255)
+  end
+
+  def summary_text(objects)
+    objects.map do |status, alert|
+      "**#{status}**\n\n" + alert.map { |alert| format_payload(alert) }.join("-" * 20 + "\n")
+    end.join("\n\n")
+  end
 
   def format_payload(payload, comment_block: false)
     locals = {
@@ -125,6 +150,7 @@ class RedmineBridge::PrometheusConnector
 
   def all_parents(target_project)
     return [] unless target_project&.parent
+
     [target_project, target_project.parent] + all_parents(target_project.parent)
   end
 
