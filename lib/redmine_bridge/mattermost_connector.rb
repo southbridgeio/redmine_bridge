@@ -63,8 +63,8 @@ class RedmineBridge::MattermostConnector
       tracker: tracker,
       status_id: status_id,
       priority_id: priority_id,
-      data: data,
-      description: build_description(params['post_id'], extra)
+      data: data.truncate(100),
+      description: build_description(params['post_id'], data, extra)
     }
 
     case command.downcase
@@ -106,10 +106,12 @@ class RedmineBridge::MattermostConnector
     [command, data, lines[1..-1].join("\n")]
   end
 
-  def build_description(post_id, extra)
+  def build_description(post_id, subject, extra)
     post_url = "#{Setting.protocol}://" + settings['mattermost_api_url'] + "/" + settings['mattermost_team_id'] + "/pl/" + post_id
 
-    "*#{I18n.t('redmine_bridge.integration.mattermost.initial_message')}*: #{post_url}\n\n#{extra}"
+    "*#{I18n.t('redmine_bridge.integration.mattermost.subject')}*:#{subject}\n\n
+     *#{I18n.t('redmine_bridge.integration.mattermost.initial_message')}*: #{post_url}\n\n
+     #{extra}"
   end
 
   def create_issue(**attrs)
