@@ -25,6 +25,14 @@ module RedmineBridge
       Rails.logger.error("RedmineBridge::MattermostClient#unknown_action RestClient error: #{unknown_payload}")
     end
 
+    def get_channel(channel_id)
+      RestClient.get(File.join("#{Setting.protocol}://", base_url, 'channels', channel_id), headers)
+    end
+
+    def get_post(post_id)
+      RestClient.get(File.join("#{Setting.protocol}://", base_url, 'posts', post_id), headers)
+    end
+
     private
 
     attr_reader :base_url, :access_token, :params

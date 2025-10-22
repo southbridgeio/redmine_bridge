@@ -25,7 +25,14 @@ class RedmineBridge::MattermostConnector
       'root_id' => external_issue.external_id.split('|').find(&:present?),
     }
     issue = Intouch::IssueDecorator.new(external_issue.redmine_issue, journal.id, protocol: 'mattermost')
-    ::RedmineBridge::MattermostClient.new(settings, params).issue_updated(issue)
+
+    mattermost_client = ::RedmineBridge::MattermostClient.new(settings, params)
+
+    begin
+      mattermost_client.issue_updated(issue)
+    rescue RestClient::BadRequest => error
+      handle_issue_updated_bad_request_error(mattermost_client, error, params)
+    end
   end
 
   def on_issue_create(*)
@@ -129,5 +136,46 @@ class RedmineBridge::MattermostConnector
                                         state: :skipped,
                                         connector_id: integration.connector_id)
     issue
+  end
+
+  def handle_issue_updated_bad_request_error(client, error, params)
+    channel_id = params['channel_id']
+    root_id = params['root_id']
+
+    unless channel_exists?(client, channel_id)
+      logger.error("RedmineBridge::MattermostConnector#on_issue_update RestClient error: External channel ##{channel_id} not found")
+      return
+    end
+
+    unless post_exists?(client, root_id)
+      logger.error("RedmineBridge::MattermostConnector#on_issue_update RestClient error: External post ##{root_id} not found")
+      return
+    end
+
+    raise error
+  end
+
+  def channel_exists?(client, channel_id)
+    return false if channel_id.blank?
+
+    client.get_channel(channel_id)
+    true
+  rescue RestClient::NotFound
+    false
+  rescue StandardError => e
+    logger.warn("Error checking channel ##{channel_id} existence: #{e.message}")
+    true # Если не можем проверить что ошибка явно указывает на отсутствие канала, считаем что он есть
+  end
+
+  def post_exists?(client, post_id)
+    return false if post_id.blank?
+
+    client.get_post(post_id)
+    true
+  rescue RestClient::NotFound
+    false
+  rescue StandardError => e
+    logger.warn("Error checking post ##{post_id} existence: #{e.message}")
+    true  # Если не можем проверить что ошибка явно указывает на отсутствие трэда, считаем что он есть
   end
 end
