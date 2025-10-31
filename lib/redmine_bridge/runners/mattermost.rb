@@ -1,7 +1,7 @@
 class RedmineBridge::Runners::Mattermost
   RECONNECT_TIME = 10
 
-  def initialize(integration:, logger: Rails.logger)
+  def initialize(logger: Rails.logger, integration:)
     @logger = logger
     @integration = integration
     @settings = integration.settings
