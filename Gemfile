@@ -1,5 +1,5 @@
 gem 'after_commit_everywhere'
-gem 'commonmarker', '~> 0.23.8'
+gem 'commonmarker', '~> 2.3.0'
 gem 'jira-ruby', '~> 2.3.0', :require => 'jira-ruby'
 gem 'aasm'
 gem 'faye-websocket'

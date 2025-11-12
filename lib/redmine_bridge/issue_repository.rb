@@ -3,7 +3,7 @@ class RedmineBridge::IssueRepository
     @integration = integration
   end
 
-  def create(external_attributes, test, **params)
+  def create(external_attributes, test: false, **params)
     status_id = integration.statuses.reject { |_k, v| v.blank? }.invert[external_attributes.status_id.to_s]
     priority_id = integration.priorities.reject { |_k, v| v.blank? }.invert[external_attributes.priority_id.to_s]
 

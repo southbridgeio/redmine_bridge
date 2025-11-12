@@ -4,7 +4,8 @@ module RedmineBridge
       include AfterCommitEverywhere
 
       # after issue creation
-      def controller_issues_new_after_save(issue:, **)
+      def controller_issues_new_after_save(context = {})
+        issue = context[:issue]
         bridge_integrations = BridgeIntegration.where(project_id: issue.project_id)
         return unless bridge_integrations.present?
 
@@ -20,7 +21,9 @@ module RedmineBridge
       end
 
       # after issue updation(comments also here)
-      def controller_issues_edit_after_save(issue:, journal:, **)
+      def controller_issues_edit_after_save(context = {})
+        issue = context[:issue]
+        journal = context[:journal]
         return unless journal.id
 
         bridge_integrations = BridgeIntegration.where(project_id: issue.project_id)
@@ -40,7 +43,8 @@ module RedmineBridge
       end
 
       # here only comments editing(not creation)
-      def controller_journals_edit_post(journal:, **)
+      def controller_journals_edit_post(context = {})
+        journal = context[:journal]
         issue = journal.issue
 
         bridge_integrations = BridgeIntegration.where(project_id: issue.project_id)

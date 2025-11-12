@@ -121,7 +121,7 @@ class RedmineBridge::MattermostConnector
      #{extra}"
   end
 
-  def create_issue(**attrs)
+  def create_issue(attrs)
     issue = Issue.create!(project: attrs[:project],
                           tracker: attrs[:tracker],
                           status_id: attrs[:status_id],

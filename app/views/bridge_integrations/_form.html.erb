@@ -12,7 +12,6 @@
       <%= form.text_field 'name' %>
     </p>
 
-
     <p>
       <%= form.label t('redmine_bridge.integration.key') %>
       <%= form.text_field 'key' %>
@@ -42,22 +41,28 @@
 
     <p><%= form.label t('redmine_bridge.integration.status_settings') + ':' %></p>
 
-    <% IssueStatus.all.each do |status| %>
-      <p>
-        <%= form.label status.name %>
-        <%= form.text_field "settings[statuses][#{status.id}]", value: @bridge_integration.settings.dig('statuses', status.id.to_s) %>
-      </p>
-    <% end %>
+    <%= form.fields_for :settings do |settings_form| %>
+      <%= settings_form.fields_for :statuses, OpenStruct.new(@bridge_integration.statuses || {}) do |statuses_form| %>
+        <% IssueStatus.all.each do |status| %>
+          <p>
+            <%= label_tag "bridge_integration_settings_statuses_#{status.id}", status.name %>
+            <%= statuses_form.text_field status.id %>
+          </p>
+        <% end %>
+      <% end %>
 
     <br>
 
-    <p><%= form.label t('redmine_bridge.integration.priority_settings') + ':' %></p>
+      <p><%= form.label t('redmine_bridge.integration.priority_settings') + ':' %></p>
 
-    <% Enumeration.where(type: 'IssuePriority').each do |enum| %>
-      <p>
-        <%= form.label enum.name %>
-        <%= form.text_field "settings[priorities][#{enum.id}]", value: @bridge_integration.settings.dig('priorities', enum.id.to_s) %>
-      </p>
+      <%= settings_form.fields_for :priorities, OpenStruct.new(@bridge_integration.priorities || {}) do |priorities_form| %>
+        <% Enumeration.where(type: 'IssuePriority').each do |enum| %>
+          <p>
+            <%= label_tag "bridge_integration_settings_priorities_#{enum.id}", enum.name %>
+            <%= priorities_form.text_field enum.id %>
+          </p>
+        <% end %>
+      <% end %>
     <% end %>
 
     <% RedmineBridge::Registry.keys.each do |key| %>

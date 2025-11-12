@@ -1,6 +1,8 @@
+require 'commonmarker'
+
 class OmniMarkup
   def self.from_gitlab_markdown(text)
-    new(Nokogiri::HTML.fragment(CommonMarker.render_html(text).gsub("<br />\n", "<br />")))
+    new(Nokogiri::HTML.fragment(Commonmarker.to_html(text).gsub("<br />\n", "<br />")))
   end
 
   def self.from_redmine_textile(text)

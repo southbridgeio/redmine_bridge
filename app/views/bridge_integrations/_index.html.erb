@@ -14,12 +14,12 @@
         <td><%= integration.name %></td>
         <td><%= integration.connector_id %></td>
         <td><%= integration.project.name %></td>
-        <td><%= link_to '', edit_bridge_integration_path(integration), class: 'icon icon-edit' %></td>
-        <td><%= link_to '', bridge_integration_path(integration), class: 'icon icon-del', method: :delete %></td>
+        <td><%= link_to sprite_icon('edit', l(:button_edit)), edit_bridge_integration_path(integration), class: 'icon icon-edit' %></td>
+        <td><%= link_to sprite_icon('del', l(:button_delete)), bridge_integration_path(integration), class: 'icon icon-del', method: :delete, data: { confirm: l(:text_are_you_sure) } %></td>
       </tr>
     <% end %>
   </tbody>
 </table>
 
 <br>
-<%= link_to t('redmine_bridge.new_integration'), new_bridge_integration_path, class: 'icon icon-add' %>
+<%= link_to sprite_icon('add', t('redmine_bridge.new_integration')), new_bridge_integration_path, class: 'icon icon-add' %>

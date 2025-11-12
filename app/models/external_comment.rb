@@ -1,4 +1,4 @@
-class ExternalComment < ActiveRecord::Base
+class ExternalComment < ApplicationRecord
   include AASM
 
   belongs_to :redmine_journal, foreign_key: 'redmine_id', class_name: 'Journal'
