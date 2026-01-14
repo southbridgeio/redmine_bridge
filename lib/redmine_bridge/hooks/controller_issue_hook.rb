@@ -33,7 +33,7 @@ module RedmineBridge
           # could be nil if we change some old issue(which exist in our project,
           # but does not exist in external)
           external_issue = ExternalIssue.find_by(redmine_id: issue.id, connector_id: bridge_integration.connector_id)
-          return unless external_issue
+          next unless external_issue
 
           # TODO: temporal for migration period before old data will be updated.
           external_issue.bridge_integration = bridge_integration
