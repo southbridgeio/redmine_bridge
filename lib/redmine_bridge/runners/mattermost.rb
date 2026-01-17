@@ -11,7 +11,8 @@ class RedmineBridge::Runners::Mattermost
     return unless valid?
 
     Thread.new do
-      I18n.locale = settings['mattermost_locale'] || 'en'
+      locale = settings['mattermost_locale'].presence || 'en'
+      I18n.locale = I18n.available_locales.include?(locale.to_sym) ? locale : 'en'
       loop do
         logger.debug [:em_run, integration.name]
         EM.run do

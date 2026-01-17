@@ -15,6 +15,7 @@ class RedmineBridge::Runner
 
   def stop_runners
     runner_threads.each_value do |thread|
+      next unless thread
       Thread.kill(thread) && thread.join
     end
   end
