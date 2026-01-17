@@ -3,7 +3,7 @@ class RedmineBridge::MattermostConnector
 
   ACCIDENT_PRIORITY = 14
 
-  def initialize(integration:, logger: Rails.logger)
+  def initialize(logger: Rails.logger, integration:)
     @logger = logger
     @integration = integration
     @settings = integration.settings
@@ -121,7 +121,7 @@ class RedmineBridge::MattermostConnector
      #{extra}"
   end
 
-  def create_issue(**attrs)
+  def create_issue(attrs)
     issue = Issue.create!(project: attrs[:project],
                           tracker: attrs[:tracker],
                           status_id: attrs[:status_id],

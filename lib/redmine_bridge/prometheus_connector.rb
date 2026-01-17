@@ -63,7 +63,7 @@ class RedmineBridge::PrometheusConnector
         )
 
         issue_repository.create(external_attributes,
-                                test,
+                                test: test,
                                 project_id: project_id,
                                 subject: subject,
                                 description: text,

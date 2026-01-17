@@ -1,56 +1,65 @@
 <br>
-<p><%= form.label t('redmine_bridge.integration.mattermost.defaults') + ':' %></p>
-<p>
-  <%= form.label 'settings[mattermost_default_tracker_id]', t('redmine_bridge.integration.mattermost.default_tracker_id') %>
-  <%= form.text_field 'settings[mattermost_default_tracker_id]', value: @bridge_integration.settings['mattermost_default_tracker_id'] %>
-</p>
-<p>
-  <%= form.label 'settings[mattermost_default_priority_id]', t('redmine_bridge.integration.mattermost.default_priority_id') %>
-  <%= form.text_field 'settings[mattermost_default_priority_id]', value: @bridge_integration.settings['mattermost_default_priority_id'] %>
-</p>
-<p>
-  <%= form.label 'settings[mattermost_default_status_id]', t('redmine_bridge.integration.mattermost.default_status_id') %>
-  <%= form.text_field 'settings[mattermost_default_status_id]', value: @bridge_integration.settings['mattermost_default_status_id'] %>
-</p>
-<p>
-  <%= form.label 'settings[mattermost_default_assignee_id]', t('redmine_bridge.integration.mattermost.default_assignee_id') %>
-  <%= form.text_field 'settings[mattermost_default_assignee_id]', value: @bridge_integration.settings['mattermost_default_assignee_id'] %>
-</p>
 
-<br>
-<p>
-  <%= form.label 'settings[mattermost_api_url]', t('redmine_bridge.integration.mattermost.api_url') %>
-  <%= form.text_field 'settings[mattermost_api_url]', value: @bridge_integration.settings['mattermost_api_url'] %>
-  <em class="info"><%= t('redmine_bridge.integration.mattermost.api_url_example') %></em>
-</p>
+<%= form.fields_for :settings, OpenStruct.new(@bridge_integration.settings || {}) do |s| %>
+  <p><%= form.label t('redmine_bridge.integration.mattermost.defaults') + ':' %></p>
 
-<p>
-  <%= form.label 'settings[mattermost_token_username]', t('redmine_bridge.integration.mattermost.username') %>
-  <%= form.text_field 'settings[mattermost_token_username]', value: @bridge_integration.settings['mattermost_token_username'] %>
-</p>
+  <p>
+    <%= s.label :mattermost_default_tracker_id, t('redmine_bridge.integration.mattermost.default_tracker_id') %>
+    <%= s.text_field :mattermost_default_tracker_id %>
+  </p>
 
-<p>
-  <%= form.label 'settings[mattermost_token_id]', t('redmine_bridge.integration.mattermost.token_id') %>
-  <%= form.text_field 'settings[mattermost_token_id]', value: @bridge_integration.settings['mattermost_token_id'] %>
-</p>
+  <p>
+    <%= s.label :mattermost_default_priority_id, t('redmine_bridge.integration.mattermost.default_priority_id') %>
+    <%= s.text_field :mattermost_default_priority_id %>
+  </p>
 
-<p>
-  <%= form.label 'settings[mattermost_access_token]', t('redmine_bridge.integration.mattermost.access_token') %>
-  <%= form.text_field 'settings[mattermost_access_token]', type: 'password', value: @bridge_integration.settings['mattermost_access_token'] %>
-</p>
+  <p>
+    <%= s.label :mattermost_default_status_id, t('redmine_bridge.integration.mattermost.default_status_id') %>
+    <%= s.text_field :mattermost_default_status_id %>
+  </p>
 
-<p>
-  <%= form.label 'settings[mattermost_team_id]', t('redmine_bridge.integration.mattermost.team_id')  %>
-  <%= form.text_field 'settings[mattermost_team_id]', value: @bridge_integration.settings['mattermost_team_id'] %>
-</p>
+  <p>
+    <%= s.label :mattermost_default_assignee_id, t('redmine_bridge.integration.mattermost.default_assignee_id') %>
+    <%= s.text_field :mattermost_default_assignee_id %>
+  </p>
 
-<p>
-  <%= form.label 'settings[mattermost_author_id]', t('redmine_bridge.integration.mattermost.author_id')  %>
-  <%= select_tag 'bridge_integration[settings[mattermost_author_id]]',
-        options_for_select(User.order(%w(lastname firstname id)).visible.map{|u| [u.name, u.id]}, @bridge_integration.settings['mattermost_author_id'].to_s) %>
-</p>
+  <br>
 
-<p>
-  <%= form.label 'settings[mattermost_locale]', t('redmine_bridge.integration.mattermost.messages_locale')  %>
-  <%= select_tag 'bridge_integration[settings[mattermost_locale]]', options_for_select(lang_options_for_select(false), @bridge_integration.settings['mattermost_locale'].to_s) %>
-</p>
+  <p>
+    <%= s.label :mattermost_api_url, t('redmine_bridge.integration.mattermost.api_url') %>
+    <%= s.text_field :mattermost_api_url %>
+    <em class="info"><%= t('redmine_bridge.integration.mattermost.api_url_example') %></em>
+  </p>
+
+  <p>
+    <%= s.label :mattermost_token_username, t('redmine_bridge.integration.mattermost.username') %>
+    <%= s.text_field :mattermost_token_username %>
+  </p>
+
+  <p>
+    <%= s.label :mattermost_token_id, t('redmine_bridge.integration.mattermost.token_id') %>
+    <%= s.text_field :mattermost_token_id %>
+  </p>
+
+  <p>
+    <%= s.label :mattermost_access_token, t('redmine_bridge.integration.mattermost.access_token') %>
+    <%= s.password_field :mattermost_access_token %>
+  </p>
+
+  <p>
+    <%= s.label :mattermost_team_id, t('redmine_bridge.integration.mattermost.team_id') %>
+    <%= s.text_field :mattermost_team_id %>
+  </p>
+
+  <p>
+    <%= s.label :mattermost_author_id, t('redmine_bridge.integration.mattermost.author_id') %>
+    <%= s.select :mattermost_author_id,
+        User.order(%w(lastname firstname id)).visible.map{|u| [u.name, u.id]},
+        { include_blank: true } %>
+  </p>
+
+  <p>
+    <%= s.label :mattermost_locale, t('redmine_bridge.integration.mattermost.messages_locale') %>
+    <%= s.select :mattermost_locale, lang_options_for_select(false), { include_blank: true } %>
+  </p>
+<% end %>

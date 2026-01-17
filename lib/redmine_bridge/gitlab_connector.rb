@@ -6,16 +6,16 @@ class RedmineBridge::GitlabConnector
                                                           access_token: settings['access_token'])
       end
 
-      def update_gitlab_issue(*args)
+      def update_gitlab_issue(project_id, issue_iid, **params)
         return if settings.values_at('base_url', 'access_token').any?(&:blank?)
 
-        gitlab_client.update_issue(*args)
+        gitlab_client.update_issue(project_id, issue_iid, **params)
       end
 
-      def create_discussion(*args)
+      def create_discussion(project_id, issue_iid, **params)
         return if settings.values_at('base_url', 'access_token').any?(&:blank?)
 
-        gitlab_client.create_discussion(*args)
+        gitlab_client.create_discussion(project_id, issue_iid, **params)
       end
     end
   end
@@ -68,7 +68,7 @@ class RedmineBridge::GitlabConnector
 
     return if gitlab_params.blank?
 
-    integration.update_gitlab_issue(project_id, issue_iid, gitlab_params)
+    integration.update_gitlab_issue(project_id, issue_iid, **gitlab_params)
   end
 
   def check_connection

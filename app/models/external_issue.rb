@@ -1,4 +1,4 @@
-class ExternalIssue < ActiveRecord::Base
+class ExternalIssue < ApplicationRecord
   include AASM
   # TODO: add paper_trail? or audited. Or we should make journals?
 
