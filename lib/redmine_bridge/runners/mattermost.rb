@@ -39,6 +39,7 @@ class RedmineBridge::Runners::Mattermost
 
           ws.onerror = lambda do |error|
             logger.debug [:ws_error, error.message]
+            EM.stop
           end
 
           ws.onmessage = lambda do |message|
