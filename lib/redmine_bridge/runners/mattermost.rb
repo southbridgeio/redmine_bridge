@@ -17,7 +17,7 @@ class RedmineBridge::Runners::Mattermost
         logger.debug [:em_run, integration.name]
         EM.run do
           url = "#{Setting.protocol == 'https' ? 'wss' : 'ws'}://#{settings['mattermost_api_url']}/api/v4/websocket"
-          ws = Faye::WebSocket::Client.new(url, [], headers: { 'Origin' => Setting.host_name }, ping: 3)
+          ws = Faye::WebSocket::Client.new(url, [], headers: { 'Origin' => Setting.host_name }, ping: 10)
 
           ws.onopen = lambda do |event|
             logger.debug [:ws_open, ws.headers]
