@@ -1,5 +1,5 @@
 class RedmineBridge::Runners::Mattermost
-  RECONNECT_TIME = 10
+  RECONNECT_TIME = 5
 
   def initialize(logger: Rails.logger, integration:)
     @logger = logger
@@ -47,7 +47,7 @@ class RedmineBridge::Runners::Mattermost
 
             data = JSON.parse(message.data)['data']
             post = JSON.parse(data['post']) if data && data['post']
-            return if post.nil? || !post['message'].start_with?("@#{settings['mattermost_token_username']}")
+            return if post.nil? || !bot_usenames.any? { |name|post['message'].start_with?(name) }
 
             # TODO: Disable debug after problem solve
             logger.error [:post, post]
@@ -74,5 +74,9 @@ class RedmineBridge::Runners::Mattermost
 
   def valid?
     [settings['mattermost_api_url'], settings['mattermost_access_token']].all?(&:present?)
+  end
+
+  def bot_usenames
+    settings['mattermost_token_username'].split(',').map{|name|"@#{name.strip}"}
   end
 end
