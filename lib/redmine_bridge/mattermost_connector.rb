@@ -108,7 +108,8 @@ class RedmineBridge::MattermostConnector
   def parse_command(params)
     lines = params['text'].split("\n")
 
-    command, data = lines[0].match(/^@\S+\s+(\S+)\s+(.+)$/).to_a[1..-1]
+    unmention_line = lines[0].gsub(/@\S+/, '').strip
+    command, data = unmention_line.match(/^(\S+)\s+(.+)$/).to_a[1..-1]
 
     [command, data, lines[1..-1].join("\n")]
   end
