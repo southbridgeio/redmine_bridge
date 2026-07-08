@@ -47,7 +47,7 @@ class RedmineBridge::Runners::Mattermost
 
             data = JSON.parse(message.data)['data']
             post = JSON.parse(data['post']) if data && data['post']
-            return if post.nil? || !bot_usenames.any? { |name|post['message'].start_with?(name) }
+            return if post.nil? || !bot_usenames.any? { |name|post['message'].include?(name) }
 
             # TODO: Disable debug after problem solve
             logger.error [:post, post]
