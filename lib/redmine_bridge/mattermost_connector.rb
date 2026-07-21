@@ -58,7 +58,7 @@ class RedmineBridge::MattermostConnector
     priority_id = settings['mattermost_default_priority_id'] || IssuePriority.active.default.id
     full_post_id = "#{params['root_id']}|#{params['post_id']}"
 
-    command, data, extra = parse_command(params)
+    command, data = parse_command(params)
     return unless command
 
     return if ExternalIssue.where(external_id: full_post_id, bridge_integration_id: integration.id).exists?
@@ -71,7 +71,7 @@ class RedmineBridge::MattermostConnector
       status_id: status_id,
       priority_id: priority_id,
       data: data.truncate(250),
-      description: build_description(params['post_id'], data, extra)
+      description: build_description(params['post_id'], params['text'])
     }
 
     case command.downcase
@@ -111,15 +111,14 @@ class RedmineBridge::MattermostConnector
     unmention_line = lines[0].gsub(/@\S+/, '').strip
     command, data = unmention_line.match(/^(\S+)\s+(.+)$/).to_a[1..-1]
 
-    [command, data, lines[1..-1].join("\n")]
+    [command, data]
   end
 
-  def build_description(post_id, subject, extra)
+  def build_description(post_id, message)
     post_url = "#{Setting.protocol}://" + settings['mattermost_api_url'] + "/" + settings['mattermost_team_id'] + "/pl/" + post_id
 
-    "*#{I18n.t('redmine_bridge.integration.mattermost.subject')}*:#{subject}\n\n
-     *#{I18n.t('redmine_bridge.integration.mattermost.initial_message')}*: #{post_url}\n\n
-     #{extra}"
+    "*#{I18n.t('redmine_bridge.integration.mattermost.message')}*:#{message}\n\n
+     *#{I18n.t('redmine_bridge.integration.mattermost.initial_message')}*: #{post_url}"
   end
 
   def create_issue(attrs)
