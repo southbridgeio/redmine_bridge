@@ -36,6 +36,7 @@ en:
         default_status_id: Status (id)
         default_assignee_id: Assignee (id)
         initial_message: Initial message
+        message: Message
         issue_created: Issue [#%{id}](%{url}) was created.
         unknown_action: Unknown command, please check syntax
         messages_locale: Notifications language
