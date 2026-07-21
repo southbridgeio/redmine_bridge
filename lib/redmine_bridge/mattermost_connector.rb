@@ -70,7 +70,7 @@ class RedmineBridge::MattermostConnector
       tracker: tracker,
       status_id: status_id,
       priority_id: priority_id,
-      data: data.truncate(100),
+      data: data.truncate(250),
       description: build_description(params['post_id'], data, extra)
     }
 
@@ -88,7 +88,7 @@ class RedmineBridge::MattermostConnector
         ::RedmineBridge::MattermostClient.new(settings, params).issue_created(issue)
       end
     else
-      issue_attributes[:data] = "#{command} #{issue_attributes[:data]}"
+      issue_attributes[:data] = "#{command} #{issue_attributes[:data]}".truncate(250)
 
       ApplicationRecord.transaction do
         issue = create_issue(issue_attributes)
