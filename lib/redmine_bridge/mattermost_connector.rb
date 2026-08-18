@@ -59,7 +59,6 @@ class RedmineBridge::MattermostConnector
     full_post_id = "#{params['root_id']}|#{params['post_id']}"
 
     command, data = parse_command(params)
-    return unless command
 
     return if ExternalIssue.where(external_id: full_post_id, bridge_integration_id: integration.id).exists?
 
@@ -70,11 +69,11 @@ class RedmineBridge::MattermostConnector
       tracker: tracker,
       status_id: status_id,
       priority_id: priority_id,
-      data: data.truncate(250),
+      data: data.presence&.truncate(250) || I18n.t('redmine_bridge.integration.mattermost.default_subject'),
       description: build_description(params['post_id'], params['text'])
     }
 
-    case command.downcase
+    case command&.downcase
     when 'задача', 'задача:', 'issue', 'issue:'
       ApplicationRecord.transaction do
         issue = create_issue(issue_attributes)
@@ -88,7 +87,7 @@ class RedmineBridge::MattermostConnector
         ::RedmineBridge::MattermostClient.new(settings, params).issue_created(issue)
       end
     else
-      issue_attributes[:data] = "#{command} #{issue_attributes[:data]}".truncate(250)
+      issue_attributes[:data] = "#{command} #{issue_attributes[:data]}".strip.truncate(250)
 
       ApplicationRecord.transaction do
         issue = create_issue(issue_attributes)
@@ -109,7 +108,7 @@ class RedmineBridge::MattermostConnector
     lines = params['text'].split("\n")
 
     unmention_line = lines[0].gsub(/@\S+/, '').strip
-    command, data = unmention_line.match(/^(\S+)\s+(.+)$/).to_a[1..-1]
+    command, data = unmention_line.match(/^(\S+)(?:\s+(.+))?$/).to_a[1..-1]
 
     [command, data]
   end

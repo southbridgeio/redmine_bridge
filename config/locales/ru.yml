@@ -38,6 +38,7 @@ ru:
         default_assignee_id: Исполнитель (id)
         initial_message: Исходное сообщение
         message: Сообщение
+        default_subject: Новое обращение от клиента
         issue_created: Задача [#%{id}](%{url}) создана.
         unknown_action: Команда не распознана, проверьте синтаксис
         messages_locale: Язык уведомлений
