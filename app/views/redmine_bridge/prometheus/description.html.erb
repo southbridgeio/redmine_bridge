@@ -3,6 +3,7 @@
 <% end %>
 
 <% annotations.each do |key, value| %>
+<% next if key == 'summary' %>
 <% value = value.sub("\n", "\n\n") if key == 'description' %>
 **<%= key %>**: <%= value.strip + "\n" %>
 <% end %>
