@@ -67,6 +67,7 @@ class RedmineBridge::PrometheusConnector
                                 project_id: project_id,
                                 subject: subject,
                                 description: text,
+                                start_date: alert_start_date(objects),
                                 tracker: Tracker.first,
                                 author: User.anonymous)
       end
@@ -76,7 +77,9 @@ class RedmineBridge::PrometheusConnector
 
     RedmineBridge::WebhookJob.set(wait: 3.seconds).perform_later(integration, params)
   rescue ActiveRecord::RecordNotUnique => e
-    # do nothing
+    logger.warn("Error: #{e}. Duplicated Prometheus webhooks, rescheduling with params: #{params}")
+
+    RedmineBridge::WebhookJob.set(wait: 3.seconds).perform_later(integration, params)
   end
 
   private
@@ -89,13 +92,20 @@ class RedmineBridge::PrometheusConnector
 
       project = find_project(integration, alert)
       status = alert_status(alert)
-      external_key = find_external_key(alert, integration)
       subject = alert_subject(alert, params['commonLabels'])
+      external_key = find_external_key(alert, integration, subject)
       key = { key: external_key, subject: subject, project_id: project&.id }
 
       data[key] ||= Hash.new { |h, k| h[k] = [] }
       data[key][status] << alert
     end
+  end
+
+  def alert_start_date(objects)
+    starts_at = objects[STATUS_PROBLEM].first['startsAt']
+    starts_at.present? ? Time.zone.parse(starts_at).to_date : nil
+  rescue ArgumentError, TypeError
+    nil
   end
 
   def alert_status(alert)
@@ -154,9 +164,14 @@ class RedmineBridge::PrometheusConnector
     [target_project, target_project.parent] + all_parents(target_project.parent)
   end
 
-  def find_external_key(alert, integration)
-    hexdigest_keys = integration.southbridge_integration? ? SOUTHBRIDGE_HEXDIGEST_FIELDS : CLIENTS_HEXDIGEST_FIELDS
+  def find_external_key(alert, integration, subject)
+    redmine_project = alert.dig('labels', 'redmine_project')
 
+    if integration.southbridge_integration? && redmine_project.present?
+      return Digest::MD5.hexdigest("#{redmine_project}#{subject}")
+    end
+
+    hexdigest_keys = integration.southbridge_integration? ? SOUTHBRIDGE_HEXDIGEST_FIELDS : CLIENTS_HEXDIGEST_FIELDS
     Digest::MD5.hexdigest("#{alert['labels'].values_at(*hexdigest_keys).join}#{alert['externalURL']}")
   end
 end
