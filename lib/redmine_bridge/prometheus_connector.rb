@@ -55,6 +55,10 @@ class RedmineBridge::PrometheusConnector
 
       if ExternalIssue.exists?(external_id: external_key, connector_id: 'prometheus')
         issue_repository.add_notes(external_key, text, test: test)
+        priority_id = objects[STATUS_PROBLEM].map{ |alert| alert.dig('labels', 'severity') }.uniq.first
+        if priority_id
+          issue_repository.update(RedmineBridge::ExternalAttributes.new(id: external_key, priority_id: priority_id))
+        end
       elsif objects[STATUS_PROBLEM].any?
         external_attributes = RedmineBridge::ExternalAttributes.new(
           id: external_key,
