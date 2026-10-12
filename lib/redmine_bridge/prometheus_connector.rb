@@ -50,13 +50,13 @@ class RedmineBridge::PrometheusConnector
       project_id = key_hash[:project_id]
       text = summary_text(objects)
 
-      external_issue = ExternalIssue.find_by(external_id: external_key)
+      external_issue = prometheus_external_issue(external_key)
       external_issue.destroy! if external_issue&.redmine_issue&.closed? && !test
 
-      if ExternalIssue.exists?(external_id: external_key, connector_id: 'prometheus')
+      if (prometheus_issue = prometheus_external_issue(external_key))
         issue_repository.add_notes(external_key, text, test: test)
         priority_id = objects[STATUS_PROBLEM].map{ |alert| alert.dig('labels', 'severity') }.uniq.first
-        if priority_id
+        if priority_id && !prometheus_issue.redmine_issue&.working?
           issue_repository.update(RedmineBridge::ExternalAttributes.new(id: external_key, priority_id: priority_id))
         end
       elsif objects[STATUS_PROBLEM].any?
@@ -89,6 +89,10 @@ class RedmineBridge::PrometheusConnector
   private
 
   attr_reader :logger, :integration
+
+  def prometheus_external_issue(external_key)
+    ExternalIssue.find_by(external_id: external_key, connector_id: 'prometheus')
+  end
 
   def grouped_alerts(params)
     Array.wrap(params['alerts']).each_with_object({}) do |alert, data|
