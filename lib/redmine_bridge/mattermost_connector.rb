@@ -19,6 +19,7 @@ class RedmineBridge::MattermostConnector
 
   def on_issue_update(journal:, external_issue:)
     return unless external_issue.external_id
+    return if journal.private_notes?
 
     params = {
       'channel_id' => external_issue.external_url,
